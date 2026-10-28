@@ -1,0 +1,11 @@
+[Unit]
+Description=Argus container egress rules
+After=docker.service
+Requires=docker.service
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+EnvironmentFile=/etc/argus/egress.env
+ExecStart=/opt/argus/egress/apply-egress.sh
+[Install]
+WantedBy=multi-user.target

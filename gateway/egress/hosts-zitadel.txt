@@ -1,0 +1,2 @@
+# ZITADEL hostnames the shim may reach (JWKS, token endpoints). Add the tenant instance host in Phase 2.
+zitadel.cloud

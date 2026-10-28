@@ -1,0 +1,7 @@
+[Unit]
+Description=Refresh Argus egress ipsets
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=15min
+[Install]
+WantedBy=timers.target

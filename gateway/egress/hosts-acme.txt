@@ -1,0 +1,3 @@
+# ACME endpoints Caddy may reach for certificates (outbound 443)
+acme-v02.api.letsencrypt.org
+acme-staging-v02.api.letsencrypt.org

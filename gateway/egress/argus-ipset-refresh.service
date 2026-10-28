@@ -1,0 +1,5 @@
+[Unit]
+Description=Refresh Argus egress ipsets
+[Service]
+Type=oneshot
+ExecStart=/opt/argus/egress/refresh-ipsets.sh
