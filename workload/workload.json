@@ -1,0 +1,475 @@
+{
+ "dataset": "allenai/qasper",
+ "parquet_commit": "06806e4608976fc2fac0a090ac425d5b2b29caf4",
+ "split_file": "qasper/validation/0000.parquet",
+ "license": "cc-by-4.0",
+ "tokenizer": "Qwen/Qwen2.5-Coder-7B-Instruct",
+ "papers": [
+  {
+   "paper_id": "1908.05828",
+   "title": "Named Entity Recognition for Nepali Language",
+   "tokens": 4417,
+   "text": "Named Entity Recognition for Nepali Language\n\nAbstract: Named Entity Recognition (NER) has been studied for many languages like English, German, Spanish, and others but virtually no studies have focused on the Nepali language. One key reason is the lack of an appropriate, annotated dataset. In this paper, we describe a Nepali NER dataset that we created. We discuss and compare the performance of various machine learning models on this dataset. We also propose a novel NER scheme for Nepali and show that this scheme, based on grapheme-level representations, outperforms character-level representations when combined with BiLSTM models. Our best models obtain an overall F1 score of 86.89, which is a significant improvement on previously reported performance in literature.\n\nIntroduction\nNamed Entity Recognition (NER) is a foremost NLP task to label each atomic elements of a sentence into specific categories like \"PERSON\", \"LOCATION\", \"ORGANIZATION\" and othersBIBREF0. There has been an extensive NER research on English, German, Dutch and Spanish language BIBREF1, BIBREF2, BIBREF3, BIBREF4, BIBREF5, and notable research on low resource South Asian languages like HindiBIBREF6, IndonesianBIBREF7 and other Indian languages (Kannada, Malayalam, Tamil and Telugu)BIBREF8. However, there has been no study on developing neural NER for Nepali language. In this paper, we propose a neural based Nepali NER using latest state-of-the-art architecture based on grapheme-level which doesn't require any hand-crafted features and no data pre-processing.\nRecent neural architecture like BIBREF1 is used to relax the need to hand-craft the features and need to use part-of-speech tag to determine the category of the entity. However, this architecture have been studied for languages like English, and German and not been applied to languages like Nepali which is a low resource language i.e limited data set to train the model. Traditional methods like Hidden Markov Model (HMM) with rule based approachesBIBREF9,BIBREF10, and Support Vector Machine (SVM) with manual feature-engineeringBIBREF11 have been applied but they perform poor compared to neural. However, there has been no research in Nepali NER using neural network. Therefore, we created the named entity annotated dataset partly with the help of Dataturk to train a neural model. The texts used for this dataset are collected from various daily news sources from Nepal around the year 2015-2016.\nFollowing are our contributions:\nWe present a novel Named Entity Recognizer (NER) for Nepali language. To best of our knowledge we are the first to propose neural based Nepali NER.\nAs there are not good quality dataset to train NER we release a dataset to support future research\nWe perform empirical evaluation of our model with state-of-the-art models with relative improvement of upto 10%\nIn this paper, we present works similar to ours in Section SECREF2. We describe our approach and dataset statistics in Section SECREF3 and SECREF4, followed by our experiments, evaluation and discussion in Section SECREF5, SECREF6, and SECREF7. We conclude with our observations in Section SECREF8.\nTo facilitate further research our code and dataset will be made available at github.com/link-yet-to-be-updated\n\nRelated Work\nThere has been a handful of research on Nepali NER task based on approaches like Support Vector Machine and gazetteer listBIBREF11 and Hidden Markov Model and gazetteer listBIBREF9,BIBREF10.\nBIBREF11 uses SVM along with features like first word, word length, digit features and gazetteer (person, organization, location, middle name, verb, designation and others). It uses one vs rest classification model to classify each word into different entity classes. However, it does not the take context word into account while training the model. Similarly, BIBREF9 and BIBREF10 uses Hidden Markov Model with n-gram technique for extracting POS-tags. POS-tags with common noun, proper noun or combination of both are combined together, then uses gazetteer list as look-up table to identify the named entities.\nResearchers have shown that the neural networks like CNNBIBREF12, RNNBIBREF13, LSTMBIBREF14, GRUBIBREF15 can capture the semantic knowledge of language better with the help of pre-trained embbeddings like word2vecBIBREF16, gloveBIBREF17 or fasttextBIBREF18.\nSimilar approaches has been applied to many South Asian languages like HindiBIBREF6, IndonesianBIBREF7, BengaliBIBREF19 and In this paper, we present the neural network architecture for NER task in Nepali language, which doesn't require any manual feature engineering nor any data pre-processing during training. First we are comparing BiLSTMBIBREF14, BiLSTM+CNNBIBREF20, BiLSTM+CRFBIBREF1, BiLSTM+CNN+CRFBIBREF2 models with CNN modelBIBREF0 and Stanford CRF modelBIBREF21. Secondly, we show the comparison between models trained on general word embeddings, word embedding + character-level embedding, word embedding + part-of-speech(POS) one-hot encoding and word embedding + grapheme clustered or sub-word embeddingBIBREF22. The experiments were performed on the dataset that we created and on the dataset received from ILPRL lab. Our extensive study shows that augmenting word embedding with character or grapheme-level representation and POS one-hot encoding vector yields better results compared to using general word embedding alone.\n\nApproach\nIn this section, we describe our approach in building our model. This model is partly inspired from multiple models BIBREF20,BIBREF1, andBIBREF2\n\nApproach ::: Bidirectional LSTM\nWe used Bi-directional LSTM to capture the word representation in forward as well as reverse direction of a sentence. Generally, LSTMs take inputs from left (past) of the sentence and computes the hidden state. However, it is proven beneficialBIBREF23 to use bi-directional LSTM, where, hidden states are computed based from right (future) of sentence and both of these hidden states are concatenated to produce the final output as $h_t$=[$\\overrightarrow{h_t}$;$\\overleftarrow{h_t}$], where $\\overrightarrow{h_t}$, $\\overleftarrow{h_t}$ = hidden state computed in forward and backward direction respectively.\n\nApproach ::: Features ::: Word embeddings\nWe have used Word2Vec BIBREF16, GloVe BIBREF17 and FastText BIBREF18 word vectors of 300 dimensions. These vectors were trained on the corpus obtained from Nepali National Corpus. This pre-lemmatized corpus consists of 14 million words from books, web-texts and news papers. This corpus was mixed with the texts from the dataset before training CBOW and skip-gram version of word2vec using gensim libraryBIBREF24. This trained model consists of vectors for 72782 unique words.\nLight pre-processing was performed on the corpus before training it. For example, invalid characters or characters other than Devanagari were removed but punctuation and numbers were not removed. We set the window context at 10 and the rare words whose count is below 5 are dropped. These word embeddings were not frozen during the training session because fine-tuning word embedding help achieve better performance compared to frozen oneBIBREF20.\nWe have used fasttext embeddings in particular because of its sub-word representation ability, which is very useful in highly inflectional language as shown in Table TABREF25. We have trained the word embedding in such a way that the sub-word size remains between 1 and 4. We particularly chose this size because in Nepali language a single letter can also be a word, for example e, t, C, r, l, n, u and a single character (grapheme) or sub-word can be formed after mixture of dependent vowel signs with consonant letters for example, C + O + = CO, here three different consonant letters form a single sub-word.\nThe two-dimensional visualization of an example word npAl is shown in FIGREF14. Principal Component Analysis (PCA) technique was used to generate this visualization which helps use to analyze the nearest neighbor words of a given sample word. 84 and 104 nearest neighbors were observed using word2vec and fasttext embedding respectively on the same corpus.\n\nApproach ::: Features ::: Character-level embeddings\nBIBREF20 and BIBREF2 successfully presented that the character-level embeddings, extracted using CNN, when combined with word embeddings enhances the NER model performance significantly, as it is able to capture morphological features of a word. Figure FIGREF7 shows the grapheme-level CNN used in our model, where inputs to CNN are graphemes. Character-level CNN is also built in similar fashion, except the inputs are characters. Grapheme or Character -level embeddings are randomly initialized from [0,1] with real values with uniform distribution of dimension 30.\n\nApproach ::: Features ::: Grapheme-level embeddings\nGrapheme is atomic meaningful unit in writing system of any languages. Since, Nepali language is highly morphologically inflectional, we compared grapheme-level representation with character-level representation to evaluate its effect. For example, in character-level embedding, each character of a word npAl results into n + + p + A + l has its own embedding. However, in grapheme level, a word npAl is clustered into graphemes, resulting into n + pA + l. Here, each grapheme has its own embedding. This grapheme-level embedding results good scores on par with character-level embedding in highly inflectional languages like Nepali, because graphemes also capture syntactic information similar to characters. We created grapheme clusters using uniseg package which is helpful in unicode text segmentations.\n\nApproach ::: Features ::: Part-of-speech (POS) one hot encoding\nWe created one-hot encoded vector of POS tags and then concatenated with pre-trained word embeddings before passing it to BiLSTM network. A sample of data is shown in figure FIGREF13.\n\nDataset Statistics ::: OurNepali dataset\nSince, we there was no publicly available standard Nepali NER dataset and did not receive any dataset from the previous researchers, we had to create our own dataset. This dataset contains the sentences collected from daily newspaper of the year 2015-2016. This dataset has three major classes Person (PER), Location (LOC) and Organization (ORG). Pre-processing was performed on the text before creation of the dataset, for example all punctuations and numbers besides ',', '-', '|' and '.' were removed. Currently, the dataset is in standard CoNLL-2003 IO formatBIBREF25.\nSince, this dataset is not lemmatized originally, we lemmatized only the post-positions like Ek, kO, l, mA, m, my, jF, sg, aEG which are just the few examples among 299 post positions in Nepali language. We obtained these post-positions from sanjaalcorps and added few more to match our dataset. We will be releasing this list in our github repository. We found out that lemmatizing the post-positions boosted the F1 score by almost 10%.\nIn order to label our dataset with POS-tags, we first created POS annotated dataset of 6946 sentences and 16225 unique words extracted from POS-tagged Nepali National Corpus and trained a BiLSTM model with 95.14% accuracy which was used to create POS-tags for our dataset.\nThe dataset released in our github repository contains each word in newline with space separated POS-tags and Entity-tags. The sentences are separated by empty newline. A sample sentence from the dataset is presented in table FIGREF13.\n\nDataset Statistics ::: ILPRL dataset\nAfter much time, we received the dataset from Bal Krishna Bal, ILPRL, KU. This dataset follows standard CoNLL-2003 IOB formatBIBREF25 with POS tags. This dataset is prepared by ILPRL Lab, KU and KEIV Technologies. Few corrections like correcting the NER tags had to be made on the dataset. The statistics of both the dataset is presented in table TABREF23.\nTable TABREF24 presents the total entities (PER, LOC, ORG and MISC) from both of the dataset used in our experiments. The dataset is divided into three parts with 64%, 16% and 20% of the total dataset into training set, development set and test set respectively.\n\nExperiments\nIn this section, we present the details about training our neural network. The neural network architecture are implemented using PyTorch framework BIBREF26. The training is performed on a single Nvidia Tesla P100 SXM2. We first run our experiment on BiLSTM, BiLSTM-CNN, BiLSTM-CRF BiLSTM-CNN-CRF using the hyper-parameters mentioned in Table TABREF30. The training and evaluation was done on sentence-level. The RNN variants are initialized randomly from $(-\\sqrt{k},\\sqrt{k})$ where $k=\\frac{1}{hidden\\_size}$.\nFirst we loaded our dataset and built vocabulary using torchtext library. This eased our process of data loading using its SequenceTaggingDataset class. We trained our model with shuffled training set using Adam optimizer with hyper-parameters mentioned in table TABREF30. All our models were trained on single layer of LSTM network. We found out Adam was giving better performance and faster convergence compared to Stochastic Gradient Descent (SGD). We chose those hyper-parameters after many ablation studies. The dropout of 0.5 is applied after LSTM layer.\nFor CNN, we used 30 different filters of sizes 3, 4 and 5. The embeddings of each character or grapheme involved in a given word, were passed through the pipeline of Convolution, Rectified Linear Unit and Max-Pooling. The resulting vectors were concatenated and applied dropout of 0.5 before passing into linear layer to obtain the embedding size of 30 for the given word. This resulting embedding is concatenated with word embeddings, which is again concatenated with one-hot POS vector.\n\nExperiments ::: Tagging Scheme\nCurrently, for our experiments we trained our model on IO (Inside, Outside) format for both the dataset, hence the dataset does not contain any B-type annotation unlike in BIO (Beginning, Inside, Outside) scheme.\n\nExperiments ::: Early Stopping\nWe used simple early stopping technique where if the validation loss does not decrease after 10 epochs, the training was stopped, else the training will run upto 100 epochs. In our experience, training usually stops around 30-50 epochs.\n\nExperiments ::: Hyper-parameters Tuning\nWe ran our experiment looking for the best hyper-parameters by changing learning rate from (0,1, 0.01, 0.001, 0.0001), weight decay from [$10^{-1}$, $10^{-2}$, $10^{-3}$, $10^{-4}$, $10^{-5}$, $10^{-6}$, $10^{-7}$], batch size from [1, 2, 4, 8, 16, 32, 64, 128], hidden size from [8, 16, 32, 64, 128, 256, 512 1024]. Table TABREF30 shows all other hyper-parameter used in our experiment for both of the dataset.\n\nExperiments ::: Effect of Dropout\nFigure FIGREF31 shows how we end up choosing 0.5 as dropout rate. When the dropout layer was not used, the F1 score are at the lowest. As, we slowly increase the dropout rate, the F1 score also gradually increases, however after dropout rate = 0.5, the F1 score starts falling down. Therefore, we have chosen 0.5 as dropout rate for all other experiments performed.\n\nEvaluation\nIn this section, we present the details regarding evaluation and comparison of our models with other baselines.\nTable TABREF25 shows the study of various embeddings and comparison among each other in OurNepali dataset. Here, raw dataset represents such dataset where post-positions are not lemmatized. We can observe that pre-trained embeddings significantly improves the score compared to randomly initialized embedding. We can deduce that Skip Gram models perform better compared CBOW models for word2vec and fasttext. Here, fastText_Pretrained represents the embedding readily available in fastText website, while other embeddings are trained on the Nepali National Corpus as mentioned in sub-section SECREF11. From this table TABREF25, we can clearly observe that model using fastText_Skip Gram embeddings outperforms all other models.\nTable TABREF35 shows the model architecture comparison between all the models experimented. The features used for Stanford CRF classifier are words, letter n-grams of upto length 6, previous word and next word. This model is trained till the current function value is less than $1\\mathrm {e}{-2}$. The hyper-parameters of neural network experiments are set as shown in table TABREF30. Since, word embedding of character-level and grapheme-level is random, their scores are near.\nAll models are evaluated using CoNLL-2003 evaluation scriptBIBREF25 to calculate entity-wise precision, recall and f1 score.\n\nDiscussion\nIn this paper we present that we can exploit the power of neural network to train the model to perform downstream NLP tasks like Named Entity Recognition even in Nepali language. We showed that the word vectors learned through fasttext skip gram model performs better than other word embedding because of its capability to represent sub-word and this is particularly important to capture morphological structure of words and sentences in highly inflectional like Nepali. This concept can come handy in other Devanagari languages as well because the written scripts have similar syntactical structure.\nWe also found out that stemming post-positions can help a lot in improving model performance because of inflectional characteristics of Nepali language. So when we separate out its inflections or morphemes, we can minimize the variations of same word which gives its root word a stronger word vector representations compared to its inflected versions.\nWe can clearly imply from tables TABREF23, TABREF24, and TABREF35 that we need more data to get better results because OurNepali dataset volume is almost ten times bigger compared to ILPRL dataset in terms of entities.\n\nConclusion and Future work\nIn this paper, we proposed a novel NER for Nepali language and achieved relative improvement of upto 10% and studies different factors effecting the performance of the NER for Nepali language.\nWe also present a neural architecture BiLSTM+CNN(grapheme-level) which turns out to be performing on par with BiLSTM+CNN(character-level) under the same configuration. We believe this will not only help Nepali language but also other languages falling under the umbrellas of Devanagari languages. Our model BiLSTM+CNN(grapheme-level) and BiLSTM+CNN(G)+POS outperforms all other model experimented in OurNepali and ILPRL dataset respectively.\nSince this is the first named entity recognition research in Nepal language using neural network, there are many rooms for improvement. We believe initializing the grapheme-level embedding with fasttext embeddings might help boosting the performance, rather than randomly initializing it. In future, we plan to apply other latest techniques like BERT, ELMo and FLAIR to study its effect on low-resource language like Nepali. We also plan to improve the model using cross-lingual or multi-lingual parameter sharing techniques by jointly training with other Devanagari languages like Hindi and Bengali.\nFinally, we would like to contribute our dataset to Nepali NLP community to move forward the research going on in language understanding domain. We believe there should be special committee to create and maintain such dataset for Nepali NLP and organize various competitions which would elevate the NLP research in Nepal.\nSome of the future works are listed below:\nProper initialization of grapheme level embedding from fasttext embeddings.\nApply robust POS-tagger for Nepali dataset\nLemmatize the OurNepali dataset with robust and efficient lemmatizer\nImprove Nepali language score with cross-lingual learning techniques\nCreate more dataset using Wikipedia/Wikidata framework\n\nAcknowledgments\nThe authors of this paper would like to express sincere thanks to Bal Krishna Bal, Kathmandu University Professor for providing us the POS-tagged Nepali NER data.\n",
+   "questions": [
+    {
+     "question_id": "567dc9bad8428ea9a2658c88203a0ed0f8da0dc3",
+     "question": "What is the best model?",
+     "gold": [
+      {
+       "type": "extractive",
+       "text": "BiLSTM+CNN(grapheme-level) and BiLSTM+CNN(G)+POS "
+      }
+     ]
+    },
+    {
+     "question_id": "d51dc36fbf6518226b8e45d4c817e07e8f642003",
+     "question": "How many sentences does the dataset contain?",
+     "gold": [
+      {
+       "type": "free_form",
+       "text": "3606"
+      },
+      {
+       "type": "extractive",
+       "text": "6946"
+      }
+     ]
+    },
+    {
+     "question_id": "d8627ba08b7342e473b8a2b560baa8cdbae3c7fd",
+     "question": "Do the authors train a Naive Bayes classifier on their dataset?",
+     "gold": [
+      {
+       "type": "yes_no",
+       "text": "no"
+      },
+      {
+       "type": "yes_no",
+       "text": "no"
+      }
+     ]
+    },
+    {
+     "question_id": "cb77d6a74065cb05318faf57e7ceca05e126a80d",
+     "question": "What is the baseline?",
+     "gold": [
+      {
+       "type": "extractive",
+       "text": "CNN modelBIBREF0 Stanford CRF modelBIBREF21"
+      },
+      {
+       "type": "free_form",
+       "text": "Bam et al. SVM, Ma and Hovy w/glove, Lample et al. w/fastText, Lample et al. w/word2vec"
+      }
+     ]
+    },
+    {
+     "question_id": "8a7615fc6ff1de287d36ab21bf2c6a3b2914f73d",
+     "question": "Which machine learning models do they explore?",
+     "gold": [
+      {
+       "type": "extractive",
+       "text": "BiLSTM BiLSTM-CNN BiLSTM-CRF BiLSTM-CNN-CRF"
+      },
+      {
+       "type": "extractive",
+       "text": "BiLSTMBIBREF14, BiLSTM+CNNBIBREF20, BiLSTM+CRFBIBREF1, BiLSTM+CNN+CRFBIBREF2 CNN modelBIBREF0 and Stanford CRF modelBIBREF21"
+      }
+     ]
+    },
+    {
+     "question_id": "a1b3e2107302c5a993baafbe177684ae88d6f505",
+     "question": "What is the size of the dataset?",
+     "gold": [
+      {
+       "type": "free_form",
+       "text": "Dataset contains 3606 total sentences and 79087 total entities."
+      },
+      {
+       "type": "free_form",
+       "text": "ILPRL contains 548 sentences, OurNepali contains 3606 sentences"
+      }
+     ]
+    },
+    {
+     "question_id": "bb2de20ee5937da7e3e6230e942bec7b6e8f61ee",
+     "question": "What is the source of their dataset?",
+     "gold": [
+      {
+       "type": "extractive",
+       "text": "daily newspaper of the year 2015-2016"
+      },
+      {
+       "type": "extractive",
+       "text": "daily newspaper of the year 2015-2016"
+      }
+     ]
+    },
+    {
+     "question_id": "1170e4ee76fa202cabac9f621e8fbeb4a6c5f094",
+     "question": "Do they try to use byte-pair encoding representations?",
+     "gold": [
+      {
+       "type": "yes_no",
+       "text": "no"
+      },
+      {
+       "type": "yes_no",
+       "text": "no"
+      }
+     ]
+    },
+    {
+     "question_id": "1462eb312944926469e7cee067dfc7f1267a2a8c",
+     "question": "How many different types of entities exist in the dataset?",
+     "gold": [
+      {
+       "type": "free_form",
+       "text": "OurNepali contains 3 different types of entities, ILPRL contains 4 different types of entities"
+      },
+      {
+       "type": "extractive",
+       "text": "three"
+      }
+     ]
+    },
+    {
+     "question_id": "f59f1f5b528a2eec5cfb1e49c87699e0c536cc45",
+     "question": "How big is the new Nepali NER dataset?",
+     "gold": [
+      {
+       "type": "free_form",
+       "text": "3606 sentences"
+      },
+      {
+       "type": "free_form",
+       "text": "Dataset contains 3606 total sentences and 79087 total entities."
+      }
+     ]
+    },
+    {
+     "question_id": "9bd080bb2a089410fd7ace82e91711136116af6c",
+     "question": "What is the performance improvement of the grapheme-level representation model over the character-level model?",
+     "gold": [
+      {
+       "type": "free_form",
+       "text": "On OurNepali test dataset Grapheme-level representation model achieves average 0.16% improvement, on ILPRL test dataset it achieves maximum 1.62% improvement"
+      },
+      {
+       "type": "extractive",
+       "text": "BiLSTM+CNN(grapheme-level) which turns out to be performing on par with BiLSTM+CNN(character-level) under the same configuration"
+      }
+     ]
+    },
+    {
+     "question_id": "6d1217b3d9cfb04be7fcd2238666fa02855ce9c5",
+     "question": "Which models are used to solve NER for Nepali?",
+     "gold": [
+      {
+       "type": "extractive",
+       "text": "BiLSTMBIBREF14, BiLSTM+CNNBIBREF20, BiLSTM+CRFBIBREF1, BiLSTM+CNN+CRFBIBREF2 CNN modelBIBREF0 and Stanford CRF modelBIBREF21"
+      },
+      {
+       "type": "extractive",
+       "text": "BiLSTM BiLSTM+CNN BiLSTM+CRF BiLSTM+CNN+CRF CNN Stanford CRF"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "paper_id": "1910.06592",
+   "title": "FacTweet: Profiling Fake News Twitter Accounts",
+   "tokens": 2960,
+   "text": "FacTweet: Profiling Fake News Twitter Accounts\n\nAbstract: We present an approach to detect fake news in Twitter at the account level using a neural recurrent model and a variety of different semantic and stylistic features. Our method extracts a set of features from the timelines of news Twitter accounts by reading their posts as chunks, rather than dealing with each tweet independently. We show the experimental benefits of modeling latent stylistic signatures of mixed fake and real news with a sequential model over a wide range of strong baselines.\n\nIntroduction\nSocial media platforms have made the spreading of fake news easier, faster as well as able to reach a wider audience. Social media offer another feature which is the anonymity for the authors, and this opens the door to many suspicious individuals or organizations to utilize these platforms. Recently, there has been an increased number of spreading fake news and rumors over the web and social media BIBREF0. Fake news in social media vary considering the intention to mislead. Some of these news are spread with the intention to be ironic or to deliver the news in an ironic way (satirical news). Others, such as propaganda, hoaxes, and clickbaits, are spread to mislead the audience or to manipulate their opinions. In the case of Twitter, suspicious news annotations should be done on a tweet rather than an account level, since some accounts mix fake with real news. However, these annotations are extremely costly and time consuming \u2013 i.e., due to high volume of available tweets Consequently, a first step in this direction, e.g., as a pre-filtering step, can be viewed as the task of detecting fake news at the account level.\nThe main obstacle for detecting suspicious Twitter accounts is due to the behavior of mixing some real news with the misleading ones. Consequently, we investigate ways to detect suspicious accounts by considering their tweets in groups (chunks). Our hypothesis is that suspicious accounts have a unique pattern in posting tweet sequences. Since their intention is to mislead, the way they transition from one set of tweets to the next has a hidden signature, biased by their intentions. Therefore, reading these tweets in chunks has the potential to improve the detection of the fake news accounts.\nIn this work, we investigate the problem of discriminating between factual and non-factual accounts in Twitter. To this end, we collect a large dataset of tweets using a list of propaganda, hoax and clickbait accounts and compare different versions of sequential chunk-based approaches using a variety of feature sets against several baselines. Several approaches have been proposed for news verification, whether in social media (rumors detection) BIBREF0, BIBREF1, BIBREF2, BIBREF3, BIBREF4, or in news claims BIBREF5, BIBREF6, BIBREF7, BIBREF8. The main orientation in the previous works is to verify the textual claims/tweets but not their sources. To the best of our knowledge, this is the first work aiming to detect factuality at the account level, and especially from a textual perspective. Our contributions are:\n[leftmargin=4mm]\nWe propose an approach to detect non-factual Twitter accounts by treating post streams as a sequence of tweets' chunks. We test several semantic and dictionary-based features together with a neural sequential approach, and apply an ablation test to investigate their contribution.\nWe benchmark our approach against other approaches that discard the chronological order of the tweets or read the tweets individually. The results show that our approach produces superior results at detecting non-factual accounts.\n\nMethodology\nGiven a news Twitter account, we read its tweets from the account's timeline. Then we sort the tweets by the posting date in ascending way and we split them into $N$ chunks. Each chunk consists of a sorted sequence of tweets labeled by the label of its corresponding account. We extract a set of features from each chunk and we feed them into a recurrent neural network to model the sequential flow of the chunks' tweets. We use an attention layer with dropout to attend over the most important tweets in each chunk. Finally, the representation is fed into a softmax layer to produce a probability distribution over the account types and thus predict the factuality of the accounts. Since we have many chunks for each account, the label for an account is obtained by taking the majority class of the account's chunks.\n\nInput Representation. Let $t$ be a Twitter account that contains $m$ tweets. These tweets are sorted by date and split into a sequence of chunks $ck = \\langle ck_1, \\ldots , ck_n \\rangle $, where each $ck_i$ contains $s$ tweets. Each tweet in $ck_i$ is represented by a vector $v \\in {\\rm I\\!R}^d$ , where $v$ is the concatenation of a set of features' vectors, that is $v = \\langle f_1, \\ldots , f_n \\rangle $. Each feature vector $f_i$ is built by counting the presence of tweet's words in a set of lexical lists. The final representation of the tweet is built by averaging the single word vectors.\n\nFeatures. We argue that different kinds of features like the sentiment of the text, morality, and other text-based features are critical to detect the nonfactual Twitter accounts by utilizing their occurrence during reporting the news in an account's timeline. We employ a rich set of features borrowed from previous works in fake news, bias, and rumors detection BIBREF0, BIBREF1, BIBREF8, BIBREF9.\n[leftmargin=4mm]\nEmotion: We build an emotions vector using word occurrences of 15 emotion types from two available emotional lexicons. We use the NRC lexicon BIBREF10, which contains $\\sim $14K words labeled using the eight Plutchik's emotions BIBREF11. The other lexicon is SentiSense BIBREF12 which is a concept-based affective lexicon that attaches emotional meanings to concepts from the WordNet lexical database. It has $\\sim $5.5 words labeled with emotions from a set of 14 emotional categories We use the categories that do not exist in the NRC lexicon.\nSentiment: We extract the sentiment of the tweets by employing EffectWordNet BIBREF13, SenticNet BIBREF14, NRC BIBREF10, and subj_lexicon BIBREF15, where each has the two sentiment classes, positive and negative.\nMorality: Features based on morality foundation theory BIBREF16 where words are labeled in one of the following 10 categories (care, harm, fairness, cheating, loyalty, betrayal, authority, subversion, sanctity, and degradation).\nStyle: We use canonical stylistic features, such as the count of question marks, exclamation marks, consecutive characters and letters, links, hashtags, users' mentions. In addition, we extract the uppercase ratio and the tweet length.\nWords embeddings: We extract words embeddings of the words of the tweet using $Glove\\-840B-300d$ BIBREF17 pretrained model. The tweet final representation is obtained by averaging its words embeddings.\nModel. To account for chunk sequences we make use of a de facto standard approach and opt for a recurrent neural model using long short-term memory (LSTM) BIBREF18. In our model, the sequence consists of a sequence of tweets belonging to one chunk (Figure FIGREF11). The LSTM learns the hidden state $h\\textsubscript {t}$ by capturing the previous timesteps (past tweets). The produced hidden state $h\\textsubscript {t}$ at each time step is passed to the attention layer which computes a `context' vector $c\\textsubscript {t}$ as the weighted mean of the state sequence $h$ by:\nWhere $T$ is the total number of timesteps in the input sequence and $\\alpha \\textsubscript {tj}$ is a weight computed at each time step $j$ for each state hj.\n\nExperiments and Results\nData. We build a dataset of Twitter accounts based on two lists annotated in previous works. For the non-factual accounts, we rely on a list of 180 Twitter accounts from BIBREF1. This list was created based on public resources where suspicious Twitter accounts were annotated with the main fake news types (clickbait, propaganda, satire, and hoax). We discard the satire labeled accounts since their intention is not to mislead or deceive. On the other hand, for the factual accounts, we use a list with another 32 Twitter accounts from BIBREF19 that are considered trustworthy by independent third parties. We discard some accounts that publish news in languages other than English (e.g., Russian or Arabic). Moreover, to ensure the quality of the data, we remove the duplicate, media-based, and link-only tweets. For each account, we collect the maximum amount of tweets allowed by Twitter API. Table TABREF13 presents statistics on our dataset.\n\nBaselines. We compare our approach (FacTweet) to the following set of baselines:\n[leftmargin=4mm]\nLR + Bag-of-words: We aggregate the tweets of a feed and we use a bag-of-words representation with a logistic regression (LR) classifier.\nTweet2vec: We use the Bidirectional Gated recurrent neural network model proposed in BIBREF20. We keep the default parameters that were provided with the implementation. To represent the tweets, we use the decoded embedding produced by the model. With this baseline we aim at assessing if the tweets' hashtags may help detecting the non-factual accounts.\nLR + All Features (tweet-level): We extract all our features from each tweet and feed them into a LR classifier. Here, we do not aggregate over tweets and thus view each tweet independently.\nLR + All Features (chunk-level): We concatenate the features' vectors of the tweets in a chunk and feed them into a LR classifier.\nFacTweet (tweet-level): Similar to the FacTweet approach, but at tweet-level; the sequential flow of the tweets is not utilized. We aim at investigating the importance of the sequential flow of tweets.\nTop-$k$ replies, likes, or re-tweets: Some approaches in rumors detection use the number of replies, likes, and re-tweets to detect rumors BIBREF21. Thus, we extract top $k$ replied, liked or re-tweeted tweets from each account to assess the accounts factuality. We tested different $k$ values between 10 tweets to the max number of tweets from each account. Figure FIGREF24 shows the macro-F1 values for different $k$ values. It seems that $k=500$ for the top replied tweets achieves the highest result. Therefore, we consider this as a baseline.\n\nExperimental Setup. We apply a 5 cross-validation on the account's level. For the FacTweet model, we experiment with 25% of the accounts for validation and parameters selection. We use hyperopt library to select the hyper-parameters on the following values: LSTM layer size (16, 32, 64), dropout ($0.0-0.9$), activation function ($relu$, $selu$, $tanh$), optimizer ($sgd$, $adam$, $rmsprop$) with varying the value of the learning rate (1e-1,..,-5), and batch size (4, 8, 16). The validation split is extracted on the class level using stratified sampling: we took a random 25% of the accounts from each class since the dataset is unbalanced. Discarding the classes' size in the splitting process may affect the minority classes (e.g. hoax). For the baselines' classifier, we tested many classifiers and the LR showed the best overall performance.\n\nResults. Table TABREF25 presents the results. We present the results using a chunk size of 20, which was found to be the best size on the held-out data. Figure FIGREF24 shows the results of different chunks sizes. FacTweet performs better than the proposed baselines and obtains the highest macro-F1 value of $0.565$. Our results indicate the importance of taking into account the sequence of the tweets in the accounts' timelines. The sequence of these tweets is better captured by our proposed model sequence-agnostic or non-neural classifiers. Moreover, the results demonstrate that the features at tweet-level do not perform well to detect the Twitter accounts factuality, since they obtain a result near to the majority class ($0.18$). Another finding from our experiments shows that the performance of the Tweet2vec is weak. This demonstrates that tweets' hashtags are not informative to detect non-factual accounts. In Table TABREF25, we present ablation tests so as to quantify the contribution of subset of features. The results indicate that most performance gains come from words embeddings, style, and morality features. Other features (emotion and sentiment) show lower importance: nevertheless, they still improve the overall system performance (on average 0.35% Macro-F$_1$ improvement). These performance figures suggest that non-factual accounts use semantic and stylistic hidden signatures mostly while tweeting news, so as to be able to mislead the readers and behave as reputable (i.e., factual) sources. We leave a more fine-grained, diachronic analysis of semantic and stylistic features \u2013 how semantic and stylistic signature evolve across time and change across the accounts' timelines \u2013 for future work.\n\nConclusions\nIn this paper, we proposed a model that utilizes chunked timelines of tweets and a recurrent neural model in order to infer the factuality of a Twitter news account. Our experimental results indicate the importance of analyzing tweet stream into chunks, as well as the benefits of heterogeneous knowledge source (i.e., lexica as well as text) in order to capture factuality. In future work, we would like to extend this line of research with further in-depth analysis to understand the flow change of the used features in the accounts' streams. Moreover, we would like to take our approach one step further incorporating explicit temporal information, e.g., using timestamps. Crucially, we are also interested in developing a multilingual version of our approach, for instance by leveraging the now ubiquitous cross-lingual embeddings BIBREF22, BIBREF23.\n",
+   "questions": [
+    {
+     "question_id": "e35c2fa99d5c84d8cb5d83fca2b434dcd83f3851",
+     "question": "How did they obtain the dataset?",
+     "gold": [
+      {
+       "type": "extractive",
+       "text": "For the non-factual accounts, we rely on a list of 180 Twitter accounts from BIBREF1 we use a list with another 32 Twitter accounts from BIBREF19 that are considered trustworthy"
+      },
+      {
+       "type": "extractive",
+       "text": "public resources where suspicious Twitter accounts were annotated list with another 32 Twitter accounts from BIBREF19 that are considered trustworthy"
+      }
+     ]
+    },
+    {
+     "question_id": "c00ce1e3be14610fb4e1f0614005911bb5ff0302",
+     "question": "What activation function do they use in their model?",
+     "gold": [
+      {
+       "type": "extractive",
+       "text": "relu selu tanh"
+      },
+      {
+       "type": "free_form",
+       "text": "Activation function is hyperparameter. Possible values: relu, selu, tanh."
+      }
+     ]
+    },
+    {
+     "question_id": "71fe5822d9fccb1cb391c11283b223dc8aa1640c",
+     "question": "What baselines do they compare to?",
+     "gold": [
+      {
+       "type": "extractive",
+       "text": "LR + Bag-of-words Tweet2vec LR + All Features (tweet-level) LR + All Features (chunk-level) FacTweet (tweet-level) Top-$k$ replies, likes, or re-tweets"
+      },
+      {
+       "type": "extractive",
+       "text": "Top-$k$ replies, likes, or re-tweets FacTweet (tweet-level) LR + All Features (chunk-level) LR + All Features (tweet-level) Tweet2vec LR + Bag-of-words"
+      }
+     ]
+    },
+    {
+     "question_id": "97d0f9a1540a48e0b4d30d7084a8c524dd09a4c3",
+     "question": "How are chunks defined?",
+     "gold": [
+      {
+       "type": "free_form",
+       "text": "Chunks is group of tweets from single account that  is consecutive in time - idea is that this group can show secret intention of malicious accounts."
+      },
+      {
+       "type": "free_form",
+       "text": "sequence of $s$ tweets"
+      }
+     ]
+    },
+    {
+     "question_id": "1062a0506c3691a93bb914171c2701d2ae9621cb",
+     "question": "What features are extracted?",
+     "gold": [
+      {
+       "type": "extractive",
+       "text": "Sentiment Morality Style Words embeddings"
+      },
+      {
+       "type": "extractive",
+       "text": "15 emotion types sentiment classes, positive and negative care, harm, fairness, cheating, loyalty, betrayal, authority, subversion, sanctity, and degradation count of question marks exclamation marks consecutive characters and letters links hashtags users' mentions uppercase ratio tweet length words embeddings"
+      }
+     ]
+    },
+    {
+     "question_id": "8e12b5c459fa963b3e549deadb864c244879fe82",
+     "question": "How many layers does their model have?",
+     "gold": [
+      {
+       "type": "unanswerable",
+       "text": ""
+      }
+     ]
+    },
+    {
+     "question_id": "483a699563efcb8804e1861b18809279f21c7610",
+     "question": "Was the approach used in this work to detect fake news fully supervised?",
+     "gold": [
+      {
+       "type": "yes_no",
+       "text": "yes"
+      }
+     ]
+    },
+    {
+     "question_id": "d3ff2986ca8cb85a9a5cec039c266df756947b43",
+     "question": "Based on this paper, what is the more predictive set of features to detect fake news?",
+     "gold": [
+      {
+       "type": "extractive",
+       "text": "words embeddings, style, and morality features"
+      },
+      {
+       "type": "extractive",
+       "text": "words embeddings, style, and morality features"
+      }
+     ]
+    },
+    {
+     "question_id": "3e1829e96c968cbd8ad8e9ce850e3a92a76b26e4",
+     "question": "How big is the dataset used in this work?",
+     "gold": [
+      {
+       "type": "free_form",
+       "text": "Total dataset size: 171 account (522967 tweets)"
+      },
+      {
+       "type": "free_form",
+       "text": "212 accounts"
+      }
+     ]
+    },
+    {
+     "question_id": "2317ca8d475b01f6632537b95895608dc40c4415",
+     "question": "How is a \"chunk of posts\" defined in this work?",
+     "gold": [
+      {
+       "type": "extractive",
+       "text": "chunk consists of a sorted sequence of tweets labeled by the label of its corresponding account"
+      },
+      {
+       "type": "free_form",
+       "text": "sequence of $s$ tweets"
+      }
+     ]
+    },
+    {
+     "question_id": "3e88fb3d28593309a307eb97e875575644a01463",
+     "question": "What baselines were used in this work?",
+     "gold": [
+      {
+       "type": "extractive",
+       "text": "LR + Bag-of-words Tweet2vec LR + All Features (tweet-level) LR + All Features (chunk-level) FacTweet (tweet-level) Top-$k$ replies, likes, or re-tweets"
+      },
+      {
+       "type": "extractive",
+       "text": "LR + Bag-of-words Tweet2vec LR + All Features (tweet-level) LR + All Features (chunk-level) FacTweet (tweet-level) Top-$k$ replies, likes, or re-tweets"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "paper_id": "1902.09666",
+   "title": "Predicting the Type and Target of Offensive Posts in Social Media",
+   "tokens": 3260,
+   "text": "Predicting the Type and Target of Offensive Posts in Social Media\n\nAbstract: As offensive content has become pervasive in social media, there has been much research in identifying potentially offensive messages. However, previous work on this topic did not consider the problem as a whole, but rather focused on detecting very specific types of offensive content, e.g., hate speech, cyberbulling, or cyber-aggression. In contrast, here we target several different kinds of offensive content. In particular, we model the task hierarchically, identifying the type and the target of offensive messages in social media. For this purpose, we complied the Offensive Language Identification Dataset (OLID), a new dataset with tweets annotated for offensive content using a fine-grained three-layer annotation scheme, which we make publicly available. We discuss the main similarities and differences between OLID and pre-existing datasets for hate speech identification, aggression detection, and similar tasks. We further experiment with and we compare the performance of different machine learning models on OLID.\n\nIntroduction\nOffensive content has become pervasive in social media and a reason of concern for government organizations, online communities, and social media platforms. One of the most common strategies to tackle the problem is to train systems capable of recognizing offensive content, which then can be deleted or set aside for human moderation. In the last few years, there have been several studies published on the application of computational methods to deal with this problem. Most prior work focuses on a different aspect of offensive language such as abusive language BIBREF0 , BIBREF1 , (cyber-)aggression BIBREF2 , (cyber-)bullying BIBREF3 , BIBREF4 , toxic comments INLINEFORM0 , hate speech BIBREF5 , BIBREF6 , BIBREF7 , BIBREF8 , BIBREF9 , BIBREF10 , and offensive language BIBREF11 . Prior work has focused on these aspects of offensive language in Twitter BIBREF3 , BIBREF7 , BIBREF8 , BIBREF11 , Wikipedia comments, and Facebook posts BIBREF2 .\nRecently, Waseem et. al. ( BIBREF12 ) acknowledged the similarities among prior work and discussed the need for a typology that differentiates between whether the (abusive) language is directed towards a specific individual or entity or towards a generalized group and whether the abusive content is explicit or implicit. Wiegand et al. ( BIBREF11 ) followed this trend as well on German tweets. In their evaluation, they have a task to detect offensive vs not offensive tweets and a second task for distinguishing between the offensive tweets as profanity, insult, or abuse. However, no prior work has explored the target of the offensive language, which is important in many scenarios, e.g., when studying hate speech with respect to a specific target.\nTherefore, we expand on these ideas by proposing a a hierarchical three-level annotation model that encompasses:\n\n\nUsing this annotation model, we create a new large publicly available dataset of English tweets. The key contributions of this paper are as follows:\n\nRelated Work\nDifferent abusive and offense language identification sub-tasks have been explored in the past few years including aggression identification, bullying detection, hate speech, toxic comments, and offensive language.\n\nAggression identification: The TRAC shared task on Aggression Identification BIBREF2 provided participants with a dataset containing 15,000 annotated Facebook posts and comments in English and Hindi for training and validation. For testing, two different sets, one from Facebook and one from Twitter were provided. Systems were trained to discriminate between three classes: non-aggressive, covertly aggressive, and overtly aggressive.\n\nBullying detection: Several studies have been published on bullying detection. One of them is the one by xu2012learning which apply sentiment analysis to detect bullying in tweets. xu2012learning use topic models to to identify relevant topics in bullying. Another related study is the one by dadvar2013improving which use user-related features such as the frequency of profanity in previous messages to improve bullying detection.\n\nHate speech identification: It is perhaps the most widespread abusive language detection sub-task. There have been several studies published on this sub-task such as kwok2013locate and djuric2015hate who build a binary classifier to distinguish between `clean' comments and comments containing hate speech and profanity. More recently, Davidson et al. davidson2017automated presented the hate speech detection dataset containing over 24,000 English tweets labeled as non offensive, hate speech, and profanity.\n\nOffensive language: The GermEval BIBREF11 shared task focused on Offensive language identification in German tweets. A dataset of over 8,500 annotated tweets was provided for a course-grained binary classification task in which systems were trained to discriminate between offensive and non-offensive tweets and a second task where the organizers broke down the offensive class into three classes: profanity, insult, and abuse.\n\nToxic comments: The Toxic Comment Classification Challenge was an open competition at Kaggle which provided participants with comments from Wikipedia labeled in six classes: toxic, severe toxic, obscene, threat, insult, identity hate.\n\nWhile each of these sub-tasks tackle a particular type of abuse or offense, they share similar properties and the hierarchical annotation model proposed in this paper aims to capture this. Considering that, for example, an insult targeted at an individual is commonly known as cyberbulling and that insults targeted at a group are known as hate speech, we pose that OLID's hierarchical annotation model makes it a useful resource for various offensive language identification sub-tasks.\n\nHierarchically Modelling Offensive Content\nIn the OLID dataset, we use a hierarchical annotation model split into three levels to distinguish between whether language is offensive or not (A), and type (B) and target (C) of the offensive language. Each level is described in more detail in the following subsections and examples are shown in Table TABREF10 .\n\nLevel A: Offensive language Detection\nLevel A discriminates between offensive (OFF) and non-offensive (NOT) tweets.\n\nNot Offensive (NOT): Posts that do not contain offense or profanity;\nOffensive (OFF): We label a post as offensive if it contains any form of non-acceptable language (profanity) or a targeted offense, which can be veiled or direct. This category includes insults, threats, and posts containing profane language or swear words.\n\nLevel B: Categorization of Offensive Language\nLevel B categorizes the type of offense and two labels are used: targeted (TIN) and untargeted (INT) insults and threats.\nTargeted Insult (TIN): Posts which contain an insult/threat to an individual, group, or others (see next layer);\nUntargeted (UNT): Posts containing non-targeted profanity and swearing. Posts with general profanity are not targeted, but they contain non-acceptable language.\n\nLevel C: Offensive Language Target Identification\nLevel C categorizes the targets of insults and threats as individual (IND), group (GRP), and other (OTH).\n\nIndividual (IND): Posts targeting an individual. It can be a a famous person, a named individual or an unnamed participant in the conversation. Insults and threats targeted at individuals are often defined as cyberbulling.\nGroup (GRP): The target of these offensive posts is a group of people considered as a unity due to the same ethnicity, gender or sexual orientation, political affiliation, religious belief, or other common characteristic. Many of the insults and threats targeted at a group correspond to what is commonly understood as hate speech.\nOther (OTH): The target of these offensive posts does not belong to any of the previous two categories (e.g. an organization, a situation, an event, or an issue).\n\nData Collection\nThe data included in OLID has been collected from Twitter. We retrieved the data using the Twitter API by searching for keywords and constructions that are often included in offensive messages, such as `she is' or `to:BreitBartNews'. We carried out a first round of trial annotation of 300 instances with six experts. The goal of the trial annotation was to 1) evaluate the proposed tagset; 2) evaluate the data retrieval method; and 3) create a gold standard with instances that could be used as test questions in the training and test setting annotation which was carried out using crowdsourcing. The breakdown of keywords and their offensive content in the trial data of 300 tweets is shown in Table TABREF14 . We included a left (@NewYorker) and far-right (@BreitBartNews) news accounts because there tends to be political offense in the comments. One of the best offensive keywords was tweets that were flagged as not being safe by the Twitter `safe' filter (the `-' indicates `not safe'). The vast majority of content on Twitter is not offensive so we tried different strategies to keep a reasonable number of tweets in the offensive class amounting to around 30% of the dataset including excluding some keywords that were not high in offensive content such as `they are` and `to:NewYorker`. Although `he is' is lower in offensive content we kept it as a keyword to avoid gender bias. In addition to the keywords in the trial set, we searched for more political keywords which tend to be higher in offensive content, and sampled our dataset such that 50% of the the tweets come from political keywords and 50% come from non-political keywords. In addition to the keywords `gun control', and `to:BreitbartNews', political keywords used to collect these tweets are `MAGA', `antifa', `conservative' and `liberal'. We computed Fliess' INLINEFORM0 on the trial set for the five annotators on 21 of the tweets. INLINEFORM1 is .83 for Layer A (OFF vs NOT) indicating high agreement. As to normalization and anonymization, no user metadata or Twitter IDs have been stored, and URLs and Twitter mentions have been substituted to placeholders. We follow prior work in related areas (burnap2015cyber,davidson2017automated) and annotate our data using crowdsourcing using the platform Figure Eight. We ensure data quality by: 1) we only received annotations from individuals who were experienced in the platform; and 2) we used test questions to discard annotations of individuals who did not reach a certain threshold. Each instance in the dataset was annotated by multiple annotators and inter-annotator agreement has been calculated. We first acquired two annotations for each instance. In case of 100% agreement, we considered these as acceptable annotations, and in case of disagreement, we requested more annotations until the agreement was above 66%. After the crowdsourcing annotation, we used expert adjudication to guarantee the quality of the annotation. The breakdown of the data into training and testing for the labels from each level is shown in Table TABREF15 .\n\nExperiments and Evaluation\nWe assess our dataset using traditional and deep learning methods. Our simplest model is a linear SVM trained on word unigrams. SVMs have produced state-of-the-art results for many text classification tasks BIBREF13 . We also train a bidirectional Long Short-Term-Memory (BiLSTM) model, which we adapted from the sentiment analysis system of sentimentSystem,rasooli2018cross and altered to predict offensive labels instead. It consists of (1) an input embedding layer, (2) a bidirectional LSTM layer, (3) an average pooling layer of input features. The concatenation of the LSTM's and average pool layer is passed through a dense layer and the output is passed through a softmax function. We set two input channels for the input embedding layers: pre-trained FastText embeddings BIBREF14 , as well as updatable embeddings learned by the model during training. Finally, we also apply a Convolutional Neural Network (CNN) model based on the architecture of BIBREF15 , using the same multi-channel inputs as the above BiLSTM.\nOur models are trained on the training data, and evaluated by predicting the labels for the held-out test set. The distribution is described in Table TABREF15 . We evaluate and compare the models using the macro-averaged F1-score as the label distribution is highly imbalanced. Per-class Precision (P), Recall (R), and F1-score (F1), also with other averaged metrics are also reported. The models are compared against baselines of predicting all labels as the majority or minority classes.\n\nOffensive Language Detection\nThe performance on discriminating between offensive (OFF) and non-offensive (NOT) posts is reported in Table TABREF18 . We can see that all systems perform significantly better than chance, with the neural models being substantially better than the SVM. The CNN outperforms the RNN model, achieving a macro-F1 score of 0.80.\n\nCategorization of Offensive Language\nIn this experiment, the two systems were trained to discriminate between insults and threats (TIN) and untargeted (UNT) offenses, which generally refer to profanity. The results are shown in Table TABREF19 .\nThe CNN system achieved higher performance in this experiment compared to the BiLSTM, with a macro-F1 score of 0.69. All systems performed better at identifying target and threats (TIN) than untargeted offenses (UNT).\n\nOffensive Language Target Identification\nThe results of the offensive target identification experiment are reported in Table TABREF20 . Here the systems were trained to distinguish between three targets: a group (GRP), an individual (IND), or others (OTH). All three models achieved similar results far surpassing the random baselines, with a slight performance edge for the neural models.\nThe performance of all systems for the OTH class is 0. This poor performances can be explained by two main factors. First, unlike the two other classes, OTH is a heterogeneous collection of targets. It includes offensive tweets targeted at organizations, situations, events, etc. making it more challenging for systems to learn discriminative properties of this class. Second, this class contains fewer training instances than the other two. There are only 395 instances in OTH, and 1,075 in GRP, and 2,407 in IND.\n\nConclusion and Future Work\nThis paper presents OLID, a new dataset with annotation of type and target of offensive language. OLID is the official dataset of the shared task SemEval 2019 Task 6: Identifying and Categorizing Offensive Language in Social Media (OffensEval) BIBREF16 . In OffensEval, each annotation level in OLID is an independent sub-task. The dataset contains 14,100 tweets and is released freely to the research community. To the best of our knowledge, this is the first dataset to contain annotation of type and target of offenses in social media and it opens several new avenues for research in this area. We present baseline experiments using SVMs and neural networks to identify the offensive tweets, discriminate between insults, threats, and profanity, and finally to identify the target of the offensive messages. The results show that this is a challenging task. A CNN-based sentence classifier achieved the best results in all three sub-tasks.\nIn future work, we would like to make a cross-corpus comparison of OLID and datasets annotated for similar tasks such as aggression identification BIBREF2 and hate speech detection BIBREF8 . This comparison is, however, far from trivial as the annotation of OLID is different.\n\nAcknowledgments\nThe research presented in this paper was partially supported by an ERAS fellowship awarded by the University of Wolverhampton.\n",
+   "questions": [
+    {
+     "question_id": "8c852fc29bda014d28c3ee5b5a7e449ab9152d35",
+     "question": "What models are used in the experiment?",
+     "gold": [
+      {
+       "type": "extractive",
+       "text": "linear SVM bidirectional Long Short-Term-Memory (BiLSTM) Convolutional Neural Network (CNN)"
+      },
+      {
+       "type": "extractive",
+       "text": "linear SVM bidirectional Long Short-Term-Memory (BiLSTM) Convolutional Neural Network (CNN)"
+      },
+      {
+       "type": "extractive",
+       "text": "linear SVM trained on word unigrams  bidirectional Long Short-Term-Memory (BiLSTM)  Convolutional Neural Network (CNN) "
+      }
+     ]
+    },
+    {
+     "question_id": "682e26262abba473412f68cbeb5f69aa3b9968d7",
+     "question": "What are the differences between this dataset and pre-existing ones?",
+     "gold": [
+      {
+       "type": "extractive",
+       "text": "no prior work has explored the target of the offensive language"
+      }
+     ]
+    },
+    {
+     "question_id": "5daeb8d4d6f3b8543ec6309a7a35523e160437eb",
+     "question": "In what language are the tweets?",
+     "gold": [
+      {
+       "type": "extractive",
+       "text": "English"
+      },
+      {
+       "type": "extractive",
+       "text": "English "
+      },
+      {
+       "type": "extractive",
+       "text": "English"
+      }
+     ]
+    },
+    {
+     "question_id": "74fb77a624ea9f1821f58935a52cca3086bb0981",
+     "question": "What is the size of the new dataset?",
+     "gold": [
+      {
+       "type": "unanswerable",
+       "text": ""
+      },
+      {
+       "type": "free_form",
+       "text": "14,100 tweets"
+      },
+      {
+       "type": "free_form",
+       "text": "Dataset contains total of 14100 annotations."
+      }
+     ]
+    },
+    {
+     "question_id": "d015faf0f8dcf2e15c1690bbbe2bf1e7e0ce3751",
+     "question": "What kinds of offensive content are explored?",
+     "gold": [
+      {
+       "type": "free_form",
+       "text": "non-targeted profanity and swearing, targeted insults such as cyberbullying, offensive content related to ethnicity, gender or sexual orientation, political affiliation, religious belief, and anything belonging to hate speech"
+      },
+      {
+       "type": "extractive",
+       "text": "Targeted Insult (TIN): Posts which contain an insult/threat to an individual, group, or others  Untargeted (UNT): Posts containing non-targeted profanity and swearing."
+      },
+      {
+       "type": "extractive",
+       "text": "offensive (OFF) and non-offensive (NOT) targeted (TIN) and untargeted (INT) insults targets of insults and threats as individual (IND), group (GRP), and other (OTH)"
+      }
+     ]
+    },
+    {
+     "question_id": "55bd59076a49b19d3283af41c5e3ccb875f3eb0c",
+     "question": "What is the best performing model?",
+     "gold": [
+      {
+       "type": "extractive",
+       "text": "CNN "
+      }
+     ]
+    },
+    {
+     "question_id": "521280a87c43fcdf9f577da235e7072a23f0673e",
+     "question": "How many annotators participated?",
+     "gold": [
+      {
+       "type": "extractive",
+       "text": "five annotators"
+      }
+     ]
+    },
+    {
+     "question_id": "5a8cc8f80509ea77d8213ed28c5ead501c68c725",
+     "question": "What is the definition of offensive language?",
+     "gold": [
+      {
+       "type": "extractive",
+       "text": " Most prior work focuses on a different aspect of offensive language such as abusive language BIBREF0 , BIBREF1 , (cyber-)aggression BIBREF2 , (cyber-)bullying BIBREF3 , BIBREF4 , toxic comments INLINEFORM0 , hate speech BIBREF5 , BIBREF6 , BIBREF7 , BIBREF8 , BIBREF9 , BIBREF10 , and offensive language BIBREF11 . Prior work has focused on these aspects of offensive language in Twitter BIBREF3 , BIBREF7 , BIBREF8 , BIBREF11 , Wikipedia comments, and Facebook posts BIBREF2 ."
+      }
+     ]
+    },
+    {
+     "question_id": "290ee79b5e3872e0496a6a0fc9b103ab7d8f6c30",
+     "question": "What are the three layers of the annotation scheme?",
+     "gold": [
+      {
+       "type": "extractive",
+       "text": "Level A: Offensive language Detection\n Level B: Categorization of Offensive Language\n Level C: Offensive Language Target Identification\n"
+      }
+     ]
+    },
+    {
+     "question_id": "1b72aa2ec3ce02131e60626639f0cf2056ec23ca",
+     "question": "How long is the dataset for each step of hierarchy?",
+     "gold": [
+      {
+       "type": "free_form",
+       "text": "Level A: 14100 Tweets\nLevel B: 4640 Tweets\nLevel C: 4089 Tweets"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}
