@@ -1,0 +1,8 @@
+{$PUBLIC_HOST} {
+	handle /v1/* {
+		reverse_proxy 172.28.0.10:8080
+	}
+	handle {
+		respond "not found" 404
+	}
+}

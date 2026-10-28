@@ -1,0 +1,10 @@
+{
+  "tenants": {
+    "tenant-a": {"salt": "REPLACE_WITH_RANDOM_SECRET"},
+    "tenant-b": {"salt": "REPLACE_WITH_RANDOM_SECRET"}
+  },
+  "factory_keys": {
+    "SHA256_OF_LITELLM_VIRTUAL_KEY": {"tenant": "tenant-a", "subject": "tenant-a-batch"}
+  },
+  "issuers": {}
+}
