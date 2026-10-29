@@ -1,0 +1,842 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Token Factory Companion: framework, evidence and proof of concept</title>
+<meta name="description" content="Detailed companion to the token factory article: the framework, the evidence behind five commitments, and the full record of a one-time proof of concept.">
+<style>
+:root{--ink:#1F2933;--muted:#5B6470;--line:#D5D9E0;--soft:#F4F5F7;--blue:#2F6FED;--blue-ink:#1D4FBF;--blue-soft:#E8F0FE;--white:#fff}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{margin:0;background:var(--white);color:var(--ink);font:17px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+a{color:var(--blue-ink);text-underline-offset:2px;overflow-wrap:anywhere}
+a:focus-visible,summary:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.wrap{max-width:940px;margin:0 auto;padding:0 20px}
+header.top{border-bottom:1px solid var(--line);padding:48px 0 28px}
+header.top .kicker{color:var(--blue-ink);font-weight:700;font-size:14px;letter-spacing:.06em;text-transform:uppercase;margin:0 0 10px}
+h1{font-size:clamp(28px,5vw,42px);line-height:1.15;margin:0 0 14px;letter-spacing:-.01em}
+.lede{font-size:19px;color:var(--ink);margin:0 0 6px;max-width:46em}
+nav.toc{position:sticky;top:0;background:rgba(255,255,255,.96);border-bottom:1px solid var(--line);z-index:5}
+nav.toc ul{display:flex;flex-wrap:wrap;gap:4px 18px;list-style:none;margin:0;padding:10px 0}
+nav.toc a{font-size:15px;text-decoration:none;font-weight:600;color:var(--ink)}
+nav.toc a:hover{color:var(--blue-ink);text-decoration:underline}
+section{padding:44px 0 8px;border-bottom:1px solid var(--line)}
+section:last-of-type{border-bottom:0}
+h2{font-size:clamp(24px,4vw,32px);line-height:1.2;margin:0 0 6px}
+h2 .n{color:var(--blue-ink);margin-right:8px}
+h3{font-size:21px;line-height:1.3;margin:34px 0 8px}
+h4{font-size:17px;line-height:1.35;margin:0 0 6px}
+p{margin:0 0 14px;max-width:46em}
+ul,ol{margin:0 0 16px;padding-left:22px;max-width:46em}
+li{margin-bottom:6px}
+code{font:14.5px/1.4 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:var(--soft);padding:1px 5px;border-radius:4px;overflow-wrap:anywhere}
+pre{font:13.5px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:0 0 18px;overflow-x:auto}
+pre.wrap{white-space:pre-wrap;overflow-wrap:anywhere;overflow-x:visible}
+.muted{color:var(--muted)}
+.small{font-size:15px}
+.status{background:var(--blue-soft);border:1px solid #BFD3FB;border-radius:12px;padding:16px 18px;margin:20px 0}
+.status p{margin:0;max-width:none}
+.note{background:var(--soft);border:1px solid var(--line);border-left:4px solid var(--blue);border-radius:8px;padding:12px 16px;margin:0 0 18px;max-width:46em}
+.note p{margin:0 0 8px}.note p:last-child{margin:0}
+.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));margin:0 0 22px}
+.card{background:var(--white);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.card.soft{background:var(--soft)}
+.card p{margin:0 0 8px;max-width:none}.card p:last-child{margin:0}
+.card .meta{color:var(--muted);font-size:14.5px}
+.card .cav{font-size:15px;border-top:1px dashed var(--line);padding-top:8px;margin-top:8px}
+.tag{display:inline-block;font-size:12.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;border-radius:999px;padding:2px 10px;margin:0 6px 6px 0;vertical-align:middle}
+.tag.live{background:var(--blue);color:#fff}
+.tag.design{background:#fff;color:var(--muted);border:1.5px solid var(--muted)}
+.tag.flag{background:#FFF4D6;color:#6B4B00;border:1px solid #E8CC84}
+.tag.vendor{background:var(--soft);color:var(--ink);border:1px solid var(--line)}
+.stat{font-size:30px;font-weight:700;color:var(--blue-ink);line-height:1.1;margin:0 0 4px}
+.stat-label{font-size:15px;color:var(--muted);margin:0}
+figure{margin:24px 0 28px}
+figure svg{display:block;width:100%;height:auto;border:1px solid var(--line);border-radius:12px}
+figcaption{font-size:15px;color:var(--muted);margin-top:10px;max-width:46em}
+table{border-collapse:collapse;width:100%;margin:0 0 22px;font-size:15.5px}
+caption{text-align:left;font-weight:700;padding:0 0 8px;font-size:16px}
+th,td{border-bottom:1px solid var(--line);padding:9px 10px;text-align:left;vertical-align:top}
+thead th{background:var(--soft);font-size:14px;text-transform:none;border-bottom:2px solid var(--line)}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+tr.total td{font-weight:700;background:var(--blue-soft)}
+details{border:1px solid var(--line);border-radius:10px;padding:0 16px;margin:0 0 18px;background:var(--white)}
+details>summary{cursor:pointer;font-weight:700;padding:12px 0;list-style-position:inside}
+details[open]>summary{border-bottom:1px solid var(--line);margin-bottom:12px}
+.steps{counter-reset:s;list-style:none;padding:0}
+.steps li{counter-increment:s;position:relative;padding-left:44px;margin-bottom:12px}
+.steps li::before{content:counter(s);position:absolute;left:0;top:0;width:30px;height:30px;border-radius:50%;background:var(--blue);color:#fff;font-weight:700;text-align:center;line-height:30px;font-size:15px}
+footer{padding:36px 0 56px;color:var(--muted);font-size:15px;border-top:1px solid var(--line)}
+@media (max-width:720px){
+ body{font-size:16.5px}
+ .wrap{padding:0 16px}
+ header.top{padding-top:32px}
+ nav.toc{position:static}
+ table.rt,table.rt thead,table.rt tbody,table.rt tr,table.rt td{display:block;width:100%}
+ table.rt thead{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden}
+ table.rt tr{border:1px solid var(--line);border-radius:10px;padding:6px 12px;margin:0 0 12px;background:var(--white)}
+ table.rt tr.total{background:var(--blue-soft)}
+ table.rt td{border:0;border-bottom:1px dashed var(--line);padding:7px 0;text-align:left}
+ table.rt td:last-child{border-bottom:0}
+ table.rt td::before{content:attr(data-label);display:block;font-size:12.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--muted);margin-bottom:1px}
+ table.rt td.num{text-align:left}
+ table.rt tr.total td{background:transparent}
+}
+@media print{nav.toc{display:none}section{break-inside:avoid-page}}
+</style>
+</head>
+<body>
+
+<header class="top"><div class="wrap">
+<p class="kicker">Companion to the article</p>
+<h1>Token Factory: the framework, the evidence and the proof of concept</h1>
+<p class="lede">A token factory sells inference as a metered service. This page holds the detail behind a proposal for building one: the design in full, the evidence for five commitments, and the complete record of a small instance that I ran once and then shut down.</p>
+<div class="status"><p><strong>Status.</strong> The proof of concept was a completed run on 28 and 29 October 2026 (UTC). The infrastructure was destroyed at the end of the run, and no endpoint is live. The repository holds the configs, the run report and the raw exports, and those files are the evidence that remains.</p></div>
+</div></header>
+
+<nav class="toc" aria-label="Sections"><div class="wrap"><ul>
+<li><a href="#overview">1 Overview</a></li>
+<li><a href="#framework">2 Framework</a></li>
+<li><a href="#evidence">3 Evidence</a></li>
+<li><a href="#poc">4 Proof of concept</a></li>
+<li><a href="#delegated">5 Delegated call</a></li>
+<li><a href="#reproduce">6 Reproduce</a></li>
+<li><a href="#limits">7 Limits</a></li>
+<li><a href="#appendix">Appendix</a></li>
+</ul></div></nav>
+
+<main class="wrap">
+
+<!-- 1 OVERVIEW -->
+<section id="overview">
+<h2><span class="n">1</span>Overview</h2>
+<p>The proposal is written from the provider's side of the counter. Customers send prompts, the factory runs them on shared GPUs, and customers get completions and a bill. Five commitments describe the terms on which the factory sells.</p>
+
+<div class="grid">
+<div class="card"><h4>Lowest cost</h4><p>Choose the model and the hardware by cost per outcome, and meter at a price that reflects what the hardware costs.</p></div>
+<div class="card"><h4>Federate with the customer's identity provider</h4><p>Customers sign in with the identity they already run.</p></div>
+<div class="card"><h4>Isolate each tenant's data and cache</h4><p>One tenant's prompts must leave no trace another tenant can measure.</p></div>
+<div class="card"><h4>Cap each tenant's spend</h4><p>The cap refuses the next call once the budget is gone.</p></div>
+<div class="card"><h4>Audit every call</h4><p>Every request leaves a row that says who made it and on whose behalf.</p></div>
+</div>
+
+<figure id="fig1">
+<svg role="img" aria-label="Diagram 1: the system. Consumers and four identity paths on the left, the gateway in the centre, the model catalog on the right, and the audit bar underneath." xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 750" font-family="Arial, Helvetica, sans-serif"><defs><marker id="d1a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2F6FED"/></marker><marker id="d1g" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#6B7280"/></marker></defs><rect width="1200" height="750" fill="#FFFFFF"/><text x="40" y="66" font-size="24" font-weight="bold" fill="#6B7280" text-anchor="start">Consumers</text><text x="450" y="66" font-size="24" font-weight="bold" fill="#6B7280" text-anchor="start">Gateway</text><text x="850" y="66" font-size="24" font-weight="bold" fill="#6B7280" text-anchor="start">Models by job</text><rect x="40" y="100" width="320" height="104" rx="14" fill="#F4F5F7" stroke="#D5D9E0" stroke-width="2"/><text x="62" y="142" font-size="26" font-weight="bold" fill="#1F2933" text-anchor="start">Factory key</text><text x="62" y="180" font-size="20" font-weight="normal" fill="#6B7280" text-anchor="start">API key</text><rect x="254" y="154" width="84" height="34" rx="17" fill="#2F6FED" stroke="#2F6FED" stroke-width="0"/><text x="296" y="178" font-size="20" font-weight="bold" fill="#FFFFFF" text-anchor="middle">Live</text><path d="M360,152 L450,152" fill="none" stroke="#2F6FED" stroke-width="3" stroke-dasharray="3 9" stroke-linecap="round" marker-end="url(#d1a)"/><rect x="40" y="224" width="320" height="104" rx="14" fill="#F4F5F7" stroke="#D5D9E0" stroke-width="2"/><text x="62" y="266" font-size="26" font-weight="bold" fill="#1F2933" text-anchor="start">Federated token</text><text x="62" y="304" font-size="20" font-weight="normal" fill="#6B7280" text-anchor="start">Tenant identity</text><rect x="254" y="278" width="84" height="34" rx="17" fill="#2F6FED" stroke="#2F6FED" stroke-width="0"/><text x="296" y="302" font-size="20" font-weight="bold" fill="#FFFFFF" text-anchor="middle">Live</text><path d="M360,276 L450,276" fill="none" stroke="#2F6FED" stroke-width="3" stroke-dasharray="3 9" stroke-linecap="round" marker-end="url(#d1a)"/><rect x="40" y="348" width="320" height="104" rx="14" fill="#F4F5F7" stroke="#D5D9E0" stroke-width="2"/><text x="62" y="390" font-size="26" font-weight="bold" fill="#1F2933" text-anchor="start">Delegated agent</text><text x="62" y="428" font-size="20" font-weight="normal" fill="#6B7280" text-anchor="start">Agent for a user</text><rect x="254" y="402" width="84" height="34" rx="17" fill="#2F6FED" stroke="#2F6FED" stroke-width="0"/><text x="296" y="426" font-size="20" font-weight="bold" fill="#FFFFFF" text-anchor="middle">Live</text><path d="M360,400 L450,400" fill="none" stroke="#2F6FED" stroke-width="3" stroke-dasharray="3 9" stroke-linecap="round" marker-end="url(#d1a)"/><rect x="40" y="472" width="320" height="104" rx="14" fill="#F4F5F7" stroke="#D5D9E0" stroke-width="2"/><text x="62" y="514" font-size="26" font-weight="bold" fill="#1F2933" text-anchor="start">Trial credential</text><text x="62" y="552" font-size="20" font-weight="normal" fill="#6B7280" text-anchor="start">Email, hard cap</text><rect x="238" y="526" width="100" height="34" rx="17" fill="#FFFFFF" stroke="#6B7280" stroke-width="2"/><text x="288" y="550" font-size="20" font-weight="bold" fill="#6B7280" text-anchor="middle">Design</text><path d="M360,524 L450,524" fill="none" stroke="#2F6FED" stroke-width="3" stroke-dasharray="3 9" stroke-linecap="round" marker-end="url(#d1a)"/><rect x="450" y="100" width="300" height="476" rx="18" fill="#FFFFFF" stroke="#2F6FED" stroke-width="3"/><rect x="470" y="124" width="260" height="62" rx="12" fill="#E8F0FE" stroke="#2F6FED" stroke-width="1.5"/><circle cx="498" cy="155" r="8" fill="#2F6FED"/><text x="522" y="164" font-size="24" font-weight="bold" fill="#1F2933" text-anchor="start">Identity</text><rect x="470" y="198" width="260" height="62" rx="12" fill="#E8F0FE" stroke="#2F6FED" stroke-width="1.5"/><circle cx="498" cy="229" r="8" fill="#2F6FED"/><text x="522" y="238" font-size="24" font-weight="bold" fill="#1F2933" text-anchor="start">Cache salt</text><rect x="470" y="272" width="260" height="62" rx="12" fill="#E8F0FE" stroke="#2F6FED" stroke-width="1.5"/><circle cx="498" cy="303" r="8" fill="#2F6FED"/><text x="522" y="312" font-size="24" font-weight="bold" fill="#1F2933" text-anchor="start">Budgets</text><rect x="470" y="346" width="260" height="62" rx="12" fill="#E8F0FE" stroke="#2F6FED" stroke-width="1.5"/><circle cx="498" cy="377" r="8" fill="#2F6FED"/><text x="522" y="386" font-size="24" font-weight="bold" fill="#1F2933" text-anchor="start">Rate limits</text><rect x="470" y="420" width="260" height="62" rx="12" fill="#E8F0FE" stroke="#2F6FED" stroke-width="1.5"/><circle cx="498" cy="451" r="8" fill="#2F6FED"/><text x="522" y="460" font-size="24" font-weight="bold" fill="#1F2933" text-anchor="start">Allowlist</text><rect x="470" y="494" width="260" height="62" rx="12" fill="#E8F0FE" stroke="#2F6FED" stroke-width="1.5"/><circle cx="498" cy="525" r="8" fill="#2F6FED"/><text x="522" y="534" font-size="24" font-weight="bold" fill="#1F2933" text-anchor="start">Audit stamp</text><rect x="850" y="100" width="310" height="140" rx="14" fill="#F4F5F7" stroke="#D5D9E0" stroke-width="2"/><text x="872" y="138" font-size="22" font-weight="bold" fill="#6B7280" text-anchor="start">Document Q&amp;A</text><rect x="872" y="154" width="266" height="70" rx="12" fill="#E8F0FE" stroke="#2F6FED" stroke-width="2"/><text x="890" y="183" font-size="23" font-weight="bold" fill="#2F6FED" text-anchor="start">Qwen2.5-Coder-7B</text><text x="890" y="210" font-size="19" font-weight="normal" fill="#2F6FED" text-anchor="start">Served in POC</text><path d="M750,170 L850,170" fill="none" stroke="#2F6FED" stroke-width="3" stroke-dasharray="3 9" stroke-linecap="round" marker-end="url(#d1a)"/><rect x="850" y="262" width="310" height="140" rx="14" fill="#F4F5F7" stroke="#D5D9E0" stroke-width="2"/><text x="872" y="300" font-size="22" font-weight="bold" fill="#6B7280" text-anchor="start">Tool calling</text><rect x="872" y="316" width="266" height="70" rx="12" fill="#FFFFFF" stroke="#D5D9E0" stroke-width="2"/><text x="890" y="345" font-size="23" font-weight="bold" fill="#1F2933" text-anchor="start">gpt-oss-20b</text><text x="890" y="372" font-size="19" font-weight="normal" fill="#6B7280" text-anchor="start">Designed</text><path d="M750,332 L850,332" fill="none" stroke="#2F6FED" stroke-width="3" stroke-dasharray="3 9" stroke-linecap="round" marker-end="url(#d1a)"/><rect x="850" y="424" width="310" height="140" rx="14" fill="#F4F5F7" stroke="#D5D9E0" stroke-width="2"/><text x="872" y="462" font-size="22" font-weight="bold" fill="#6B7280" text-anchor="start">Text2SQL</text><rect x="872" y="478" width="266" height="70" rx="12" fill="#E8F0FE" stroke="#2F6FED" stroke-width="2"/><text x="890" y="507" font-size="23" font-weight="bold" fill="#2F6FED" text-anchor="start">Qwen2.5-Coder-7B</text><text x="890" y="534" font-size="19" font-weight="normal" fill="#2F6FED" text-anchor="start">Served in POC</text><path d="M750,494 L850,494" fill="none" stroke="#2F6FED" stroke-width="3" stroke-dasharray="3 9" stroke-linecap="round" marker-end="url(#d1a)"/><path d="M600,576 L600,626" fill="none" stroke="#2F6FED" stroke-width="3" stroke-dasharray="3 9" stroke-linecap="round" marker-end="url(#d1a)"/><rect x="40" y="626" width="1120" height="96" rx="18" fill="#E8F0FE" stroke="#2F6FED" stroke-width="3"/><text x="64" y="684" font-size="28" font-weight="bold" fill="#2F6FED" text-anchor="start">Audit every call</text><rect x="390" y="654" width="116" height="40" rx="20" fill="#FFFFFF" stroke="#2F6FED" stroke-width="1.5"/><text x="448" y="682" font-size="21" font-weight="normal" fill="#1F2933" text-anchor="middle">tenant</text><rect x="518" y="654" width="116" height="40" rx="20" fill="#FFFFFF" stroke="#2F6FED" stroke-width="1.5"/><text x="576" y="682" font-size="21" font-weight="normal" fill="#1F2933" text-anchor="middle">mode</text><rect x="646" y="654" width="116" height="40" rx="20" fill="#FFFFFF" stroke="#2F6FED" stroke-width="1.5"/><text x="704" y="682" font-size="21" font-weight="normal" fill="#1F2933" text-anchor="middle">subject</text><rect x="774" y="654" width="116" height="40" rx="20" fill="#FFFFFF" stroke="#2F6FED" stroke-width="1.5"/><text x="832" y="682" font-size="21" font-weight="normal" fill="#1F2933" text-anchor="middle">actor</text><rect x="902" y="654" width="116" height="40" rx="20" fill="#FFFFFF" stroke="#2F6FED" stroke-width="1.5"/><text x="960" y="682" font-size="21" font-weight="normal" fill="#1F2933" text-anchor="middle">model</text><rect x="1030" y="654" width="116" height="40" rx="20" fill="#FFFFFF" stroke="#2F6FED" stroke-width="1.5"/><text x="1088" y="682" font-size="21" font-weight="normal" fill="#1F2933" text-anchor="middle">cost</text></svg>
+<figcaption><strong>Diagram 1, the system.</strong> Consumers and four identity paths on the left, the gateway in the centre, the model catalog on the right, and the audit bar underneath. Three identity paths ran live in the proof of concept: factory key, federated identity provider and delegated agent. The trial tier exists as a design. The proof of concept served one model, Qwen2.5-Coder-7B-Instruct, marked in blue. Every call ends in an audit row.</figcaption>
+</figure>
+
+<h3>The proof of concept at a glance</h3>
+<div class="grid">
+<div class="card soft"><p class="stat">3 of 4</p><p class="stat-label">identity paths ran live: factory key, federated user, delegated agent</p></div>
+<div class="card soft"><p class="stat">0 vs 4,480</p><p class="stat-label">cached tokens Tenant B read on its first call, salting on versus off</p></div>
+<div class="card soft"><p class="stat">18 of 33</p><p class="stat-label">questions answered before the budget cap refused call 19</p></div>
+<div class="card soft"><p class="stat">259</p><p class="stat-label">calls reconstructed from the audit table: 1,039,846 tokens, $0.206264</p></div>
+<div class="card soft"><p class="stat">about $2.49</p><p class="stat-label">total cost of the run, including idle time</p></div>
+</div>
+
+<p>Section 2 gives the framework. Section 3 holds the evidence for each commitment, with dates, links and caveats. Section 4 is the full record of the run, section 5 follows one delegated call from sign-in to audit row, section 6 says how to reproduce it, and section 7 lists the limits and open questions. The appendix shows the claims I checked and chose not to cite.</p>
+</section>
+
+<!-- 2 FRAMEWORK -->
+<section id="framework">
+<h2><span class="n">2</span>The framework in full</h2>
+<p>The design rests on one idea. Every identity path resolves to the same principal record before anything else happens, and every downstream control reads that record and ignores the raw request.</p>
+
+<h3 id="principal">2.1 The resolved principal</h3>
+<p>The principal carries a tenant, an identity mode, a subject, a key or client id, an optional actor, the allowed models and a budget account. The budget check, the model allowlist, the cache salt, the rate limit and the audit row each take their key from this record. A client-supplied tenant header never enters it.</p>
+<pre class="wrap">{ tenant_id, identity_mode, subject, key_id | client_id, actor?, scopes/models, budget_account }</pre>
+<figure id="fig2">
+<svg role="img" aria-label="Diagram 2: the resolved principal. Four paths converge into one principal record, with the downstream controls as chips." xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 710" font-family="Arial, Helvetica, sans-serif"><defs><marker id="d2a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2F6FED"/></marker><marker id="d2g" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#6B7280"/></marker></defs><rect width="1200" height="710" fill="#FFFFFF"/><text x="40" y="64" font-size="24" font-weight="bold" fill="#6B7280" text-anchor="start">Paths</text><text x="880" y="64" font-size="24" font-weight="bold" fill="#6B7280" text-anchor="start">Controls</text><rect x="40" y="110" width="330" height="104" rx="14" fill="#F4F5F7" stroke="#D5D9E0" stroke-width="2"/><text x="62" y="152" font-size="26" font-weight="bold" fill="#1F2933" text-anchor="start">Factory key</text><text x="62" y="190" font-size="20" font-weight="normal" fill="#6B7280" text-anchor="start">API key</text><rect x="264" y="164" width="84" height="34" rx="17" fill="#2F6FED" stroke="#2F6FED" stroke-width="0"/><text x="306" y="188" font-size="20" font-weight="bold" fill="#FFFFFF" text-anchor="middle">Live</text><path d="M370,162 C425,162 425,226 480,226" fill="none" stroke="#2F6FED" stroke-width="3" stroke-dasharray="3 9" stroke-linecap="round" marker-end="url(#d2a)"/><rect x="40" y="250" width="330" height="104" rx="14" fill="#F4F5F7" stroke="#D5D9E0" stroke-width="2"/><text x="62" y="292" font-size="26" font-weight="bold" fill="#1F2933" text-anchor="start">Federated token</text><text x="62" y="330" font-size="20" font-weight="normal" fill="#6B7280" text-anchor="start">Tenant identity</text><rect x="264" y="304" width="84" height="34" rx="17" fill="#2F6FED" stroke="#2F6FED" stroke-width="0"/><text x="306" y="328" font-size="20" font-weight="bold" fill="#FFFFFF" text-anchor="middle">Live</text><path d="M370,302 C425,302 425,326 480,326" fill="none" stroke="#2F6FED" stroke-width="3" stroke-dasharray="3 9" stroke-linecap="round" marker-end="url(#d2a)"/><rect x="40" y="390" width="330" height="104" rx="14" fill="#F4F5F7" stroke="#D5D9E0" stroke-width="2"/><text x="62" y="432" font-size="26" font-weight="bold" fill="#1F2933" text-anchor="start">Delegated agent</text><text x="62" y="470" font-size="20" font-weight="normal" fill="#6B7280" text-anchor="start">Agent for a user</text><rect x="264" y="444" width="84" height="34" rx="17" fill="#2F6FED" stroke="#2F6FED" stroke-width="0"/><text x="306" y="468" font-size="20" font-weight="bold" fill="#FFFFFF" text-anchor="middle">Live</text><path d="M370,442 C425,442 425,426 480,426" fill="none" stroke="#2F6FED" stroke-width="3" stroke-dasharray="3 9" stroke-linecap="round" marker-end="url(#d2a)"/><rect x="40" y="530" width="330" height="104" rx="14" fill="#F4F5F7" stroke="#D5D9E0" stroke-width="2"/><text x="62" y="572" font-size="26" font-weight="bold" fill="#1F2933" text-anchor="start">Trial credential</text><text x="62" y="610" font-size="20" font-weight="normal" fill="#6B7280" text-anchor="start">Email, hard cap</text><rect x="248" y="584" width="100" height="34" rx="17" fill="#FFFFFF" stroke="#6B7280" stroke-width="2"/><text x="298" y="608" font-size="20" font-weight="bold" fill="#6B7280" text-anchor="middle">Design</text><path d="M370,582 C425,582 425,526 480,526" fill="none" stroke="#2F6FED" stroke-width="3" stroke-dasharray="3 9" stroke-linecap="round" marker-end="url(#d2a)"/><rect x="480" y="90" width="300" height="580" rx="18" fill="#FFFFFF" stroke="#2F6FED" stroke-width="3"/><path d="M480,154 L480,108 Q480,90 498,90 L762,90 Q780,90 780,108 L780,154 z" fill="#2F6FED"/><text x="630" y="134" font-size="30" font-weight="bold" fill="#FFFFFF" text-anchor="middle">Principal</text><text x="508" y="200" font-size="25" font-weight="bold" fill="#1F2933" text-anchor="start">tenant_id</text><line x1="500" y1="228" x2="760" y2="228" stroke="#D5D9E0" stroke-width="2"/><text x="508" y="274" font-size="25" font-weight="bold" fill="#1F2933" text-anchor="start">identity_mode</text><line x1="500" y1="302" x2="760" y2="302" stroke="#D5D9E0" stroke-width="2"/><text x="508" y="348" font-size="25" font-weight="bold" fill="#1F2933" text-anchor="start">subject</text><line x1="500" y1="376" x2="760" y2="376" stroke="#D5D9E0" stroke-width="2"/><text x="508" y="422" font-size="25" font-weight="bold" fill="#1F2933" text-anchor="start">key_id</text><line x1="500" y1="450" x2="760" y2="450" stroke="#D5D9E0" stroke-width="2"/><text x="508" y="496" font-size="25" font-weight="bold" fill="#1F2933" text-anchor="start">actor</text><line x1="500" y1="524" x2="760" y2="524" stroke="#D5D9E0" stroke-width="2"/><text x="508" y="570" font-size="25" font-weight="bold" fill="#1F2933" text-anchor="start">models</text><line x1="500" y1="598" x2="760" y2="598" stroke="#D5D9E0" stroke-width="2"/><text x="508" y="644" font-size="25" font-weight="bold" fill="#1F2933" text-anchor="start">budget_account</text><rect x="880" y="110" width="280" height="72" rx="14" fill="#E8F0FE" stroke="#2F6FED" stroke-width="2"/><text x="1020" y="156" font-size="25" font-weight="bold" fill="#1F2933" text-anchor="middle">Budget check</text><path d="M780,146 L880,146" fill="none" stroke="#2F6FED" stroke-width="3" stroke-dasharray="3 9" stroke-linecap="round" marker-end="url(#d2a)"/><rect x="880" y="230" width="280" height="72" rx="14" fill="#E8F0FE" stroke="#2F6FED" stroke-width="2"/><text x="1020" y="276" font-size="25" font-weight="bold" fill="#1F2933" text-anchor="middle">Model allowlist</text><path d="M780,266 L880,266" fill="none" stroke="#2F6FED" stroke-width="3" stroke-dasharray="3 9" stroke-linecap="round" marker-end="url(#d2a)"/><rect x="880" y="350" width="280" height="72" rx="14" fill="#E8F0FE" stroke="#2F6FED" stroke-width="2"/><text x="1020" y="396" font-size="25" font-weight="bold" fill="#1F2933" text-anchor="middle">Cache salt</text><path d="M780,386 L880,386" fill="none" stroke="#2F6FED" stroke-width="3" stroke-dasharray="3 9" stroke-linecap="round" marker-end="url(#d2a)"/><rect x="880" y="470" width="280" height="72" rx="14" fill="#E8F0FE" stroke="#2F6FED" stroke-width="2"/><text x="1020" y="516" font-size="25" font-weight="bold" fill="#1F2933" text-anchor="middle">Rate limit</text><path d="M780,506 L880,506" fill="none" stroke="#2F6FED" stroke-width="3" stroke-dasharray="3 9" stroke-linecap="round" marker-end="url(#d2a)"/><rect x="880" y="590" width="280" height="72" rx="14" fill="#E8F0FE" stroke="#2F6FED" stroke-width="2"/><text x="1020" y="636" font-size="25" font-weight="bold" fill="#1F2933" text-anchor="middle">Audit row</text><path d="M780,626 L880,626" fill="none" stroke="#2F6FED" stroke-width="3" stroke-dasharray="3 9" stroke-linecap="round" marker-end="url(#d2a)"/></svg>
+<figcaption><strong>Diagram 2, the resolved principal.</strong> Four paths converge into one principal record, with the downstream controls as chips on the right.</figcaption>
+</figure>
+
+<h3 id="paths">2.2 The four identity paths</h3>
+
+<div class="card" style="margin-bottom:14px">
+<p><span class="tag live">Live</span><strong>(a) Factory-issued credentials</strong> <span class="muted">API keys or OAuth client credentials. In the proof of concept: Tenant A.</span></p>
+<p><strong>Flow.</strong> The operator, or a tenant admin through a portal, requests a key. The gateway mints a virtual key bound to a tenant and shows it once. The tenant's service sends it as a bearer credential. The gateway hashes the key, looks it up, loads its policy (models, budget, rate limits, expiry) and forwards to the model with a credential the tenant never sees.</p>
+<p><strong>Validation and storage.</strong> Keys are random and at least 256 bits, with a recognisable prefix and a short non-secret id for lookup. Only a hash is stored. For high-entropy machine keys a fast hash such as SHA-256, ideally HMAC-SHA-256 with a server-side pepper, is the standard pattern, because slow password hashes suit low-entropy human passwords. The gateway master key is never a tenant credential. Rotation runs as issue new, overlap, revoke old, with one key per application so that revocation reaches one application.</p>
+<p><strong>Budget and audit.</strong> Spend attributes to key, user and team in the spend ledger. The audit row carries the key hash prefix, the tenant, the model, the tokens and the cost.</p>
+<p><strong>Pitfalls.</strong> Key leakage into repositories, logs and client bundles. Keys with no budget, which is the denial-of-wallet case (OWASP LLM10, unbounded consumption). Shared keys that destroy attribution. Rotation that needs downtime because only one active key per tenant was designed in. Exposure of the master key.</p>
+</div>
+
+<div class="card" style="margin-bottom:14px">
+<p><span class="tag live">Live</span><strong>(b) Federated identity provider</strong> <span class="muted">The tenant's own Okta, Entra or Google over OIDC. In the proof of concept: Tenant B, through ZITADEL Cloud.</span></p>
+<p><strong>Flow.</strong> The tenant admin registers the factory as a relying party in their identity provider, or the factory registers a client in a tenant-dedicated realm. A user or service obtains a token from that provider, with authorization code and PKCE for people and client credentials for services, and calls the gateway with the JWT. The gateway validates it, maps its claims to a tenant and applies policy and budget as in path (a).</p>
+<p><strong>Validation.</strong></p>
+<ul>
+<li>Signature against the issuer's published key set, selected by key id. Asymmetric algorithms only; HMAC algorithms are rejected.</li>
+<li>Issuer: exact string match. A trailing slash and the scheme both matter.</li>
+<li>Audience must contain the gateway's audience. Expiry and not-before are checked with a small clock-skew allowance of 60 seconds or less.</li>
+<li>Tenant comes from an operator-controlled registry keyed on issuer and subject. A valid token from Tenant B's provider must be unable to assert Tenant A's id.</li>
+</ul>
+<p>Key-set caching matters. A gateway that caches the key set for its time-to-live and does not refetch on a key-id miss will reject a just-rotated key until the cache expires. With several issuers, a shared key list that selects by key id alone can verify only one issuer and audience, so the issuer must be verified per provider and unlisted issuers must be rejected.</p>
+<p><strong>Budget and audit.</strong> The resolved tenant maps to a team created out of band. The audit row carries issuer, subject, tenant and the identity mode.</p>
+<p><strong>Pitfalls.</strong> Accepting ID tokens in place of access tokens, which gives the wrong audience. Not verifying the issuer when several providers are configured, so that any provider can impersonate. Algorithm confusion. Outages from key-set rotation against fail-open stale keys. Subject values collide across providers, because a subject is unique only per issuer. Tenant onboarding friction (redirect URIs, custom domains, availability of the tenant's identity admin) is the schedule risk. Group-claim overage in large directories.</p>
+</div>
+
+<div class="card" style="margin-bottom:14px">
+<p><span class="tag live">Live</span><strong>(c) Delegated agent</strong> <span class="muted">An agent acting for an end user. In the proof of concept: Tenant B's agent.</span></p>
+<p><strong>Flow, single trust domain.</strong> The user authenticates to their identity provider, and the agent obtains the user's token. The agent calls the provider's token endpoint with the RFC 8693 token-exchange grant, passing the user's token as the subject token and optionally its own token as the actor token, with an attenuated audience and scope. The provider returns a short-lived token whose subject is the user and whose <code>act</code> claim names the agent, with nested <code>act</code> claims for chains. The agent presents that token to the gateway, which validates it as in path (b) and extracts <code>act</code>.</p>
+<p><strong>Cross-domain variant.</strong> When the agent and the resource sit in different trust domains, the pattern standardised in the IETF draft on identity assertion authorization grants (<code>draft-ietf-oauth-identity-assertion-authz-grant</code>, revision 04 dated 2026-05-21) chains two exchanges: an RFC 8693 exchange at the user's identity provider that yields an identity assertion, then an RFC 7523 JWT-bearer grant at the resource's authorization server. Consent and policy live at the identity provider. It is a 2026 draft, so a factory should implement RFC 8693 <code>act</code>-claim support first and treat this as the cross-domain upgrade path.</p>
+<p><strong>Validation.</strong> Both identities independently: the user (subject, tenant from the user's issuer) and the agent (<code>act.sub</code> or the agent's client id). Authorisation is the intersection of the agent's allowed models, the user's allowed models and the tenant policy. Scopes may only narrow across an exchange. The gateway rejects exchanges that widen scope, tokens that lack <code>act</code> when an agent is present, and a raw user session token forwarded by an agent, which is the token-passthrough anti-pattern this mode exists to replace.</p>
+<p><strong>Budget and audit.</strong> Spend charges the tenant or user account. Rate limits and anomaly alerts attach to the agent as well. Audit rows carry the user as subject, the agent as actor and the delegation depth. Either identity must be revocable alone: removing the agent's registration must not reset the user's credentials, and the reverse.</p>
+<p><strong>Pitfalls.</strong> Confused deputy, where an agent is tricked into using its delegation for another user (bind tokens to the agent's key where possible, for example with DPoP or mutual TLS). Recursive or unbounded delegation chains, so cap <code>act</code> nesting, typically at 1. Long-lived delegated tokens, which should last minutes. Audit rows that record only the user, which makes agent abuse unattributable.</p>
+<p><strong>What ran.</strong> The identity provider instance did not advertise token exchange, so the proof of concept used the fallback in the design: the gateway validated the user's token and the agent's token and minted the delegation token itself. Section 5 shows the call.</p>
+</div>
+
+<div class="card" style="margin-bottom:22px">
+<p><span class="tag design">Design</span><strong>(d) Trial tier</strong> <span class="muted">Email-verified or anonymous, hard-capped. Not built.</span></p>
+<p><strong>Flow.</strong> Sign-up with email verification (magic link or one-time code) or an anonymous session. The factory mints a trial-scoped credential, the gateway enforces the trial policy, and on exhaustion the caller gets a hard 402 or 429 with an upgrade path and no silent overage.</p>
+<p><strong>Controls.</strong> A tiny total budget (for example $0.50 to $2, not resetting by default), one cheap model, low request and token rates, small <code>max_tokens</code> and context limits, a credential lifetime of hours to days, one trial per verified email plus payment and network heuristics, a bot check at sign-up, and minimal content logging. The trial account is separate from paid accounts, so trial burn can never consume a paying tenant's budget. The audit still stamps every call, because trial traffic is where abuse telemetry comes from.</p>
+<p><strong>Pitfalls.</strong> Sybil farming with disposable emails, and anonymous trials that work as an open proxy and get found by scanners within hours. Scripts that use trial keys as a free inference API, so cap tokens per request and in total, not only the request rate. SMS one-time codes are the classic toll-fraud vector, so prefer email links. The hard cap must account for in-flight concurrency.</p>
+</div>
+
+<table class="rt">
+<caption>The four paths side by side</caption>
+<thead><tr><th></th><th>(a) Factory keys</th><th>(b) Federated IdP</th><th>(c) Delegated agent</th><th>(d) Trial</th></tr></thead>
+<tbody>
+<tr><td>Who vouches</td><td data-label="(a) Factory keys">Factory</td><td data-label="(b) Federated IdP">Tenant's identity provider</td><td data-label="(c) Delegated agent">User's provider plus agent registration</td><td data-label="(d) Trial">Factory, through email proof</td></tr>
+<tr><td>Credential</td><td data-label="(a) Factory keys">Virtual key or client credentials</td><td data-label="(b) Federated IdP">Tenant-provider JWT</td><td data-label="(c) Delegated agent">Exchanged JWT with <code>act</code></td><td data-label="(d) Trial">Short-lived trial key or JWT</td></tr>
+<tr><td>Gateway validates</td><td data-label="(a) Factory keys">Key hash and policy</td><td data-label="(b) Federated IdP">Signature, issuer, audience, expiry, claims</td><td data-label="(c) Delegated agent">Path (b) plus <code>act</code> and scope attenuation</td><td data-label="(d) Trial">Key or JWT plus trial policy</td></tr>
+<tr><td>Budget attaches to</td><td data-label="(a) Factory keys">Key or team</td><td data-label="(b) Federated IdP">Mapped team</td><td data-label="(c) Delegated agent">User or tenant, with a limit per agent</td><td data-label="(d) Trial">Trial account</td></tr>
+<tr><td>Audit identity</td><td data-label="(a) Factory keys">Key id, tenant</td><td data-label="(b) Federated IdP">Issuer and subject, tenant</td><td data-label="(c) Delegated agent">Subject and actor, tenant</td><td data-label="(d) Trial">Trial user id, tenant trial</td></tr>
+<tr><td>Biggest pitfall</td><td data-label="(a) Factory keys">Leakage, keys with no budget</td><td data-label="(b) Federated IdP">Unverified issuer across providers</td><td data-label="(c) Delegated agent">Token passthrough, user-only audit</td><td data-label="(d) Trial">Sybil and open-proxy abuse</td></tr>
+</tbody></table>
+
+<h3 id="gateway-choice">2.3 The gateway choice, as licensing facts</h3>
+<p>The proof of concept used LiteLLM's open-source tier as the money layer. The reasons are facts about where LiteLLM's documentation places each feature, read on 27 October 2026 through a web index (not in a logged-in session). Prices and tiers change, so check the pages again before committing money.</p>
+<table class="rt">
+<thead><tr><th>Capability</th><th>Tier, per LiteLLM's documentation</th><th>Used in the proof of concept</th></tr></thead>
+<tbody>
+<tr><td data-label="Capability">Virtual keys, per-key and per-team budgets, model allowlists, rate limits</td><td data-label="Tier, per LiteLLM's documentation">Open-source tier</td><td data-label="Used in the proof of concept">Yes: Tenant A's key, Tenant B's team and keys</td></tr>
+<tr><td data-label="Capability">Spend ledger in Postgres (per key, user, team, model)</td><td data-label="Tier, per LiteLLM's documentation">Open-source tier</td><td data-label="Used in the proof of concept">Yes: the metering side of every audit join</td></tr>
+<tr><td data-label="Capability">JWT and OIDC authentication (per-issuer key sets, issuer and audience checks, claim-to-team mapping)</td><td data-label="Tier, per LiteLLM's documentation">Enterprise tier. The documentation page states that it requires an Enterprise license.</td><td data-label="Used in the proof of concept">No. A small service of my own does this work.</td></tr>
+<tr><td data-label="Capability">Audit logs proper</td><td data-label="Tier, per LiteLLM's documentation">Enterprise tier, per the framework report</td><td data-label="Used in the proof of concept">No. The audit table is the shim's own.</td></tr>
+</tbody></table>
+<p>The shim exists because of that tier boundary. The reference design is an open-source gateway for money controls (keys, budgets, spend), a small owned layer for identity (token validation, tenant mapping, delegation) and an append-only audit table of my own. The shim came to 236 lines of Python in <code>gateway/shim/app.py</code>, inside the 150 to 300 line estimate that the design set. Sources: <a href="https://docs.litellm.ai/docs/proxy/token_auth">LiteLLM JWT and OIDC authentication</a>, <a href="https://docs.litellm.ai/docs/proxy/jwt_auth_arch">LiteLLM OIDC model access</a>.</p>
+
+<h3 id="idp">2.4 The identity provider used</h3>
+<p>The federated path needs a real external OIDC provider that the operator can run for a demo tenant. ZITADEL Cloud's free tier was the choice: per its pricing page (read through the web index on 27 October 2026), it offers unlimited stored users and organisations, 100 daily active users and three identity providers at $0, with a custom domain on a paid plan, so the run used the provider's own <code>zitadel.cloud</code> hostname. In production, mode (b) means the tenant's pre-existing corporate provider; a demo provider stands in for it.</p>
+
+<h3 id="isolation">2.5 Isolation and request hygiene on shared inference</h3>
+<ul>
+<li><strong>Prefix-cache salt.</strong> Automatic prefix caching reuses cache blocks for shared prompt prefixes, and a hit is visible as a faster first token. A per-request <code>cache_salt</code> is mixed into the hash of the first block, and every later block hashes from its parent, so only same-salt requests share blocks. vLLM's documentation says the salt should be random, secret and unpredictable, around 256 bits.</li>
+<li><strong>The gateway owns the salt.</strong> The salt derives from the authenticated tenant (a stored per-tenant secret, or an HMAC of a server secret and the tenant id). The gateway strips any salt the client sends and overwrites it. The same treatment applies to multimodal <code>uuid</code> values and <code>kv_transfer_params</code>. Salts rotate on tenant off-boarding or key compromise, at the price of a cold cache for that tenant.</li>
+<li><strong>Honest limits.</strong> vLLM's documentation says it does not isolate tenants that share a server process, and that the salt is not an isolation boundary. Tenants still share the scheduler and the GPU, a noisy neighbour can degrade latency, and timing channels beyond the prefix cache stay open. Full isolation is a dedicated instance per tenant.</li>
+<li><strong>Response caching.</strong> A response cache keyed on prompt content serves one tenant's answer to another. Keep the gateway's response cache off on multi-tenant routes, or include tenant, identity and model version in the key. Semantic caching across tenants is ruled out.</li>
+<li><strong>Payload validation before the model.</strong> Schema and size caps, an allowlist of parameters, caps on <code>max_tokens</code>, <code>n</code> and context length, an allowlist of media domains for image inputs, removal of upstream-identity fields, and a per-tenant concurrency cap so one tenant cannot fill the shared batch.</li>
+<li><strong>Upstream hardening.</strong> vLLM's <code>--api-key</code> protects only the <code>/v1</code> family of paths. Other paths, including metrics and cache-reset endpoints, answer without a key. The model endpoint should be reachable only from the gateway, and the gateway should allowlist paths. In the run, the gateway proxied <code>/v1/*</code> only and answered 404 for every other path.</li>
+</ul>
+
+<h3 id="audit-record">2.6 The audit record</h3>
+<p>One append-only row per request, written by the gateway before it forwards the call, not inferred later from a vendor bill. The framework lists these fields: request id, timestamp, tenant, identity mode, subject, actor if any, model requested and served, prompt, completion and cached tokens, cost, a salt identifier (never the salt), latency, status and the policy decisions. Metadata audit is not content logging: prompt and response bodies are stored separately, encrypted, for a short time, or not at all. The proof of concept stored none.</p>
+
+<h3 id="architecture">2.7 Reference architecture, and what to build, buy or defer</h3>
+<table class="rt">
+<thead><tr><th>Layer</th><th>Role</th></tr></thead>
+<tbody>
+<tr><td data-label="Layer">Edge and auth shim</td><td data-label="Role">Terminates TLS, resolves the principal for every path, strips and overwrites client-supplied tenancy fields, injects the cache salt, caps parameters, writes the audit row, and forwards with the tenant's key held server-side.</td></tr>
+<tr><td data-label="Layer">Gateway (LiteLLM open-source tier with Postgres)</td><td data-label="Role">Model catalogue, virtual keys, teams, budgets, rate limits, spend ledger.</td></tr>
+<tr><td data-label="Layer">Identity layer</td><td data-label="Role">A tenant registry (tenant, mode, issuers, audience, claim map, status) plus a cached key set for each issuer.</td></tr>
+<tr><td data-label="Layer">Secrets</td><td data-label="Role">Environment secrets with owner-only permissions for the proof of concept, never in git. In production, a key management service or vault, with the gateway database's encryption key stored apart from its backups.</td></tr>
+<tr><td data-label="Layer">Budget ledger</td><td data-label="Role">The spend log is the system of record. A nightly reconciliation against the vendor's usage export is useful, but vendor bills are delayed and coarse, so they are never the enforcement source.</td></tr>
+<tr><td data-label="Layer">Inference endpoint</td><td data-label="Role">One upstream in the proof of concept, with the model-side key held only in the gateway's config.</td></tr>
+</tbody></table>
+<table class="rt">
+<thead><tr><th>Build</th><th>Use off the shelf</th><th>Defer, and name it</th></tr></thead>
+<tbody><tr>
+<td data-label="Build">The auth shim with principal resolution for the paths, the tenant registry, salt injection, payload caps, the audit table and the demos</td>
+<td data-label="Use off the shelf">LiteLLM open-source tier, a free-tier identity provider, Caddy for TLS, Docker Compose, Postgres</td>
+<td data-label="Defer, and name it">Billing and invoicing (budgets are caps, not billing), service-level objectives, multi-region operation, dedicated per-tenant endpoints, SCIM provisioning, a self-service tenant portal, guardrail and PII tooling</td>
+</tr></tbody></table>
+
+<h3 id="checklist">2.8 Reviewer security checklist</h3>
+<ul>
+<li>Keys are hashed, shown once, never logged, and the master key is kept apart.</li>
+<li>The model-side key exists only in gateway secrets.</li>
+<li>Per-issuer issuer and audience are enforced, HMAC algorithms are rejected, key rotation is tested, and the fail-closed or stale-key policy is a deliberate choice.</li>
+<li>Clock skew is 60 seconds or less, expiry and not-before are checked, and token lifetimes are short.</li>
+<li>JWTs are bearer credentials: short expiry bounds replay, and a token-id denylist is reserved for high-value operations. API-key replay is bounded by budget and allowlist. Sender-constrained tokens suit agent mode.</li>
+<li>The cache salt is overwritten server-side, secret per tenant, and a cache-isolation test runs in CI.</li>
+<li>Client-supplied <code>kv_transfer_params</code>, media ids and extra parameters are stripped.</li>
+<li>The gateway response cache is off or tenant-keyed.</li>
+<li>The model endpoint is not directly reachable by tenants, and paths outside <code>/v1</code> are blocked.</li>
+<li>The budget hard-stop is tested under concurrency, with in-flight overshoot bounded by <code>max_tokens</code> caps.</li>
+<li>Every request gets an audit row, rejections included, with identity mode and actor. Prompt bodies stay out of audit logs.</li>
+<li>Trial anti-abuse controls exist. TLS is used everywhere, and the admin UI is not public.</li>
+<li>The database is backed up, a restore has been rehearsed, and secrets are kept out of the backup.</li>
+</ul>
+</section>
+
+<!-- 3 EVIDENCE -->
+<section id="evidence">
+<h2><span class="n">3</span>The evidence bank</h2>
+<p>Each commitment has a short synthesis of why it matters, followed by the sources as cards with dates, links and caveats. Sources were opened and read on 27 October 2026 unless a card says otherwise. Where a 2026 edition of a recurring report exists, the 2026 figures replace the 2025 ones, and the appendix lists the superseded figures. Tags mark the source type: <span class="tag flag">Caveat</span> for a limit on how to read it, <span class="tag vendor">Vendor</span> for a vendor survey with original data.</p>
+
+<h3 id="ev-isolate">3.1 Isolate each tenant's data and cache</h3>
+<p><strong>Why it matters.</strong> The prefix cache that makes shared inference fast also gives callers a timing side channel. An adversarial tenant can try to reconstruct another tenant's prompt from cache-hit latency, and published attacks report success rates from 89% up to 100% against unprotected servers. The attack needs only ordinary API access. The channel has a tracked CVE in vLLM. AWS's SaaS guidance states the architectural rule that isolation is a separate mechanism from authentication.</p>
+<div class="grid">
+<div class="card"><h4>A shared cache lets one tenant probe another's prompt</h4>
+<p>KVGov reports a timing side channel in multi-tenant KV caches and cites three published attacks (PromptPeek, EarlyBird, InputSnatch) reaching up to 100% success against unprotected vLLM and SGLang. Measured on Qwen2.5-7B-Instruct with vLLM on an A100, a 2,119-token prefix took 149.6 ms to first token cold and 32.8 ms cached (a ratio of 0.22). Per-principal cache salting kept about 93% of the prefix-cache benefit.</p>
+<p class="meta">Tejasvi C. Addagada, "KVGov", arXiv:2608.09225v1, 10 August 2026. <a href="https://arxiv.org/abs/2608.09225v1">arxiv.org/abs/2608.09225v1</a></p>
+<p class="cav"><span class="tag flag">Caveat</span>Single-author preprint. The defence was evaluated in simulation.</p></div>
+<div class="card"><h4>The attacks need no privileges</h4>
+<p>Chu et al. describe global KV-cache sharing as an API-visible timing channel. Their tabulation reports PromptPeek at 99%, 98% and 95% success (input, template and whole prompt), EarlyBird at 89%, and InputSnatch from 43.33% to 100% across 13 legal domains. The attacker interacts only through the standard API.</p>
+<p class="meta">Chu et al., "Selective KV-Cache Sharing to Mitigate Timing Side-Channels in LLM Inference" (SafeKV), arXiv:2508.08438v2, 2025. <a href="https://arxiv.org/html/2508.08438v2">arxiv.org/html/2508.08438v2</a></p>
+<p class="cav"><span class="tag flag">Caveat</span>Preprint. The figures are as tabulated by the authors.</p></div>
+<div class="card"><h4>The channel is a tracked CVE</h4>
+<p>CVE-2025-46570 (advisory GHSA-4qjh-9fv9-r85r, published 29 May 2025, CWE-208) covers vLLM before 0.9.0. Cache-hit detection from time to first token reached an AUC of 0.571 with a 1-token prefix and 0.99 with an 8-token prefix. The fix, in 0.9.0, is cache salting.</p>
+<p class="meta">Via the Wiz vulnerability database summary of the GitHub advisory. <a href="https://www.wiz.io/vulnerability-database/cve/cve-2025-46570">wiz.io/vulnerability-database/cve/cve-2025-46570</a></p>
+<p class="cav"><span class="tag flag">Caveat</span>CVSS v3.1 base score 2.6, rated LOW, because the attack is complex. Cite it for existence and measurability, not for severity.</p></div>
+<div class="card"><h4>Isolation is separate from authentication</h4>
+<p>The whitepaper says SaaS systems need explicit mechanisms that isolate each tenant's resources even on shared infrastructure, and that an authenticated and authorized user can still reach another tenant's resources unless tenant context is enforced.</p>
+<p class="meta">AWS, "SaaS Architecture Fundamentals" whitepaper, 3 August 2022 (foundational). <a href="https://d1.awsstatic.com/onedam/marketing-channels/website/aws/en_US/events/approved/documents/saas-architecture-fundamentals-whitepaper.pdf">AWS whitepaper (PDF)</a></p></div>
+</div>
+
+<h3 id="ev-audit">3.2 Audit every call</h3>
+<p><strong>Why it matters.</strong> Logging is becoming a legal property of AI systems. The EU AI Act asks for automatic recording of events and for retention of at least six months, and its high-risk obligations are deferred to 2027 and 2028. Practice trails the direction: most enterprises in one survey have agents running that they do not know about. A service that audits every call by construction closes the gap the surveys measure.</p>
+<div class="grid">
+<div class="card"><h4>The law asks for automatic logs</h4>
+<p>Article 12 of Regulation (EU) 2024/1689 says high-risk AI systems shall technically allow automatic recording of events over the lifetime of the system. Article 19 says providers keep the logs for a period suited to the purpose and at least six months.</p>
+<p class="meta">EU AI Act Articles <a href="https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-12">12</a> and <a href="https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-19">19</a>, European Commission AI Act Service Desk.</p>
+<p class="cav"><span class="tag flag">Caveat</span>Regulation (EU) 2026/1744 (the Digital Omnibus on AI, in force 27 July 2026) defers high-risk obligations to 2 December 2027 for stand-alone Annex III systems and 2 August 2028 for Annex I products, per law-firm and standards-body analyses read through an index. Article 12 is not currently applicable; read it as the direction of regulation.</p></div>
+<div class="card"><h4>Most enterprises cannot see their own agents</h4>
+<p>The survey reports that 82% of enterprises have unknown AI agents running in their infrastructure, and 65% had an agent-related incident in the previous 12 months. Of those incidents, 61% involved data exposure, 43% operational disruption and 35% financial loss. Only 21% have formal agent decommissioning processes.</p>
+<p class="meta">Cloud Security Alliance, "Autonomous but Not Controlled", fielded January 2026 (n=418 IT and security professionals), press release 21 April 2026. <a href="https://cloudsecurityalliance.org/press-releases/2026/04/21/new-cloud-security-alliance-survey-reveals-82-of-enterprises-have-unknown-ai-agents-in-their-environments">cloudsecurityalliance.org</a></p>
+<p class="cav"><span class="tag flag">Caveat</span>The survey was commissioned by Token Security.</p></div>
+<div class="card"><h4>NIST expects monitoring, inventory and documented incidents</h4>
+<p>The AI Risk Management Framework asks for post-deployment monitoring plans (MANAGE 4.1), ongoing monitoring and periodic review (GOVERN 1.5), a mechanism to inventory AI systems (GOVERN 1.6) and documented incident tracking and recovery (MANAGE 4.3).</p>
+<p class="meta">NIST AI 100-1, AI Risk Management Framework 1.0, January 2023 (foundational). <a href="https://nvlpubs.nist.gov/nistpubs/ai/nist.ai.100-1.pdf">nvlpubs.nist.gov</a></p></div>
+<div class="card"><h4>The visibility gap nearly tripled in a year</h4>
+<p>Organisations unable to tell whether employees use unsanctioned AI tools rose from 6.3% in 2025 to 17.6% in 2026. For AI agents the blind spot is 21.1%, and 88.4% of organisations had at least one agent-related security incident in the past year.</p>
+<p class="meta">AvePoint, "State of AI Report 2026" with Osterman Research (n=750 enterprise leaders), 29 June 2026. <a href="https://www.avepoint.com/news/avepoint-research-reveals-ai-visibility-gaps-have-nearly-tripled-as-ai-agents-scale-and-almost-half-of-enterprise-employees-now-rely-on-agents-daily-or-weekly-260629">avepoint.com</a></p>
+<p class="cav"><span class="tag vendor">Vendor</span>Vendor research with original data.</p></div>
+</div>
+
+<h3 id="ev-federate">3.3 Federate with the customer's identity provider</h3>
+<p><strong>Why it matters.</strong> Attackers sign in. Valid-account abuse sits behind a large share of cloud incidents, password spraying dominates cloud initial access, and the 2026 reports describe attackers pivoting as MFA and passkeys spread. A service that federates inherits the customer's own sign-in controls, lifecycle and revocation, instead of adding its own passwords to the blast radius. Standards point the same way.</p>
+<div class="grid">
+<div class="card"><h4>Legitimate access becomes the threat</h4>
+<p>Password spray accounts for over 99% of observed cloud initial-access efforts, in 124,146,529 password-spray attacks seen in Defender XDR data from December 2025 to June 2026. Overall password attacks fell 26% year on year, which the report attributes to MFA and passkeys forcing a pivot. The share of adversary-in-the-middle phishing and token theft more than doubled in the first six months of 2026. Of intrusions that began with valid accounts, 52.2% involved follow-on credential theft and 18.4% involved active password spray.</p>
+<p class="meta">Microsoft, 2026 Digital Defense Report, "Decoding emergence" (July 2025 to June 2026), published 1 October 2026. <a href="https://cdn-dynmedia-1.microsoft.com/is/content/microsoftcorp/microsoft/msc/documents/presentations/CSR/2026-Microsoft-Digital-Defense-Report.pdf">Report (PDF)</a> and <a href="https://blogs.microsoft.com/on-the-issues/2026/10/01/preparing-governments-for-an-era-of-interconnected-cyber-risk/">launch post</a>.</p>
+<p class="cav"><span class="tag flag">Caveat</span>The 99% figure is scoped to cloud initial access, not to all identity attacks. Microsoft's 73.3% figure (of initial-access attempts involving user execution, valid accounts, social engineering or phishing) comes from its <a href="https://news.microsoft.com/source/asia/2026/10/13/microsoft-digital-defense-2026-report-highlights-new-cybersecurity-challenges-amid-rapid-ai-adoption/">13 October 2026 summary</a>. Phishing appears as 23% of intrusions in the incident-response data and as 11% in the Defender Experts data; the two are separate datasets and are not merged here.</p></div>
+<div class="card"><h4>Most detections involve no malware</h4>
+<p>82% of detections were malware-free, as adversaries used valid credentials, trusted identity flows and approved SaaS integrations. Valid-account abuse accounted for 35% of cloud incidents, and cloud-conscious intrusions rose 37%.</p>
+<p class="meta">CrowdStrike, 2026 Global Threat Report, 24 February 2026; still the latest edition on 27 October 2026. <a href="https://www.crowdstrike.com/en-us/blog/crowdstrike-2026-global-threat-report-findings/">crowdstrike.com</a></p></div>
+<div class="card"><h4>Exploitation has overtaken stolen credentials</h4>
+<p>From more than 31,000 incidents and more than 22,000 confirmed breaches in 145 countries, exploitation of vulnerabilities is now the most common initial access vector at 31%, and credential abuse, the previous leader, fell to 13%. Verizon notes this is the first time in 19 years that exploitation has passed stolen credentials.</p>
+<p class="meta">Verizon, 2026 Data Breach Investigations Report (19th edition), 19 May 2026. <a href="https://www.verizon.com/business/resources/executivebriefs/2026-dbir-executive-summary.pdf">Executive summary (PDF)</a></p>
+<p class="cav"><span class="tag flag">Caveat</span>Verizon reports the breach count only as "more than 22,000". The 2025 reading that credential abuse leads is no longer true.</p></div>
+<div class="card"><h4>Federated sessions can now receive events after login</h4>
+<p>The OpenID Foundation finalized the Shared Signals Framework 1.0, CAEP 1.0 and RISC 1.0 on 16 September 2025, as the first global standards for real-time security event sharing. Before them, systems relying on federated identity had no way to receive security updates after the initial login, while sessions last days or weeks.</p>
+<p class="meta"><a href="https://openid.net/press-release-openid-foundation-finalizes-global-standards-for-real-time-identity-security/">openid.net</a></p></div>
+<div class="card"><h4>Federation is NIST's model</h4>
+<p>SP 800-63C-4 describes a credential service provider supplying authentication attributes, and optionally subscriber attributes, to a number of separately administered relying parties.</p>
+<p class="meta">NIST SP 800-63C-4, "Digital Identity Guidelines: Federation and Assertions", July 2025. <a href="https://csrc.nist.gov/pubs/sp/800/63/c/4/final">csrc.nist.gov</a></p></div>
+<div class="card"><h4>Agent identity is on NIST's agenda</h4>
+<p>NIST's CAISI launched an AI Agent Standards Initiative on 17 February 2026, and the NCCoE published "Accelerating the Adoption of Software and AI Agent Identity and Authorization" on 5 February 2026.</p>
+<p class="meta">Per a Cloud Security Alliance research note of 5 April 2026. <a href="https://labs.cloudsecurityalliance.org/wp-content/uploads/2026/04/CSA_research_note_nist-ai-agent-standards-initiative_20260405-csa-styled.pdf">CSA note (PDF)</a></p>
+<p class="cav"><span class="tag flag">Caveat</span>Secondary source. The note labels itself unofficial and AI-assisted, and NIST's own pages were not opened.</p></div>
+</div>
+
+<h3 id="ev-cap">3.4 Cap each tenant's spend</h3>
+<p><strong>Why it matters.</strong> Consumption-priced inference fails open. One runaway agent loop produced a roughly $50,000 bill in under an hour, 93% of organisations in a McKinsey survey report exceeding AI budgets, and surveys show policy without real-time visibility. A cap enforced where spend is recorded refuses the next call, and a policy document does not.</p>
+<div class="grid">
+<div class="card"><h4>One loop, about $50,000 in under an hour</h4>
+<p>A financial-services provider's ledger-reconciliation agent, with read and write access to billing databases, hit a corrupted null value and entered a recursive reasoning loop. In under an hour it made over 15,000 reasoning API calls, and the bill spiked by about $50,000.</p>
+<p class="meta">Mandiant and Google Cloud, "AI Risk and Resilience in 2026", September 2026. <a href="https://cloud.google.com/security/resources/ai-risk-and-resilience-2026?e=48754805">cloud.google.com</a></p>
+<p class="cav"><span class="tag flag">Caveat</span>The report page was opened and read; the case-study passage was captured through a search index of the same URL.</p></div>
+<div class="card"><h4>Budgets exhausted in months, and the prescribed control</h4>
+<p>Some companies have exhausted annual AI budgets in a matter of months, AI spend rises nearly fourfold as organisations scale, 93% report exceeding AI budgets and only 20 to 25% have mature AI FinOps. The recommended control is limits on retries, tool calls, agent loops and escalation paths.</p>
+<p class="meta">McKinsey &amp; Company, "The cost of intelligence: How CIOs can manage AI demand at scale", 2026 (enterprise AI FinOps survey, May 2026). <a href="https://www.mckinsey.com/capabilities/quantumblack/our-insights/the-cost-of-intelligence-how-cios-can-manage-ai-demand-at-scale">mckinsey.com</a></p></div>
+<div class="card"><h4>Unexpected bills are routine, and visibility lags policy</h4>
+<p>72% had an unexpected AI cost spike or bill in the past year, and 33% had more than one. 52% say no one clearly owns AI costs. Respondents estimate 26% of AI spend is wasted, 73% have AI cost policies, and only 13% have basic visibility into AI spend.</p>
+<p class="meta">Harness, "2026 State of AI in FinOps", 29 July 2026 (700 engineering leaders and practitioners, five countries, fielded May to June 2026). <a href="https://www.prnewswire.com/news-releases/new-harness-report-reveals-enterprise-ai-spend-has-outgrown-the-systems-built-to-track-it-302837776.html">PR Newswire release</a></p>
+<p class="cav"><span class="tag vendor">Vendor</span>Vendor survey with original data, read through the PR Newswire release.</p></div>
+</div>
+
+<h3 id="ev-cost">3.5 Lowest cost</h3>
+<p><strong>Why it matters.</strong> Inference has become the budget. It is the majority workload for most startups and about half of enterprises, enterprise AI spend more than tripled in a year, and 98% of FinOps respondents now manage AI spend. Cost is driven by task structure as well as token price. A factory's cost position is a first-order competitive fact.</p>
+<div class="grid">
+<div class="card"><h4>Inference is the majority workload</h4>
+<p>74% of startups (up from 48%) and 49% of enterprises (up from 29%) say inference accounts for most of their compute. Enterprise LLM spend went from $3.5B in November 2024 to $8.4B in mid-2025.</p>
+<p class="meta">Menlo Ventures, "2025 Mid-Year LLM Market Update", 31 July 2025 (survey of 150 technical leaders). <a href="https://menlovc.com/perspective/2025-mid-year-llm-market-update/">menlovc.com</a></p>
+<p class="cav"><span class="tag flag">Caveat</span>No 2026 edition exists as of 27 October 2026 (checked against Menlo's reports index), so the 2025 figures stand as the latest.</p></div>
+<div class="card"><h4>Enterprise AI spend tripled</h4>
+<p>$37B in 2025, up from $11.5B in 2024 (3.2 times) and $1.7B in 2023.</p>
+<p class="meta">Menlo Ventures, "2025: The State of Generative AI in the Enterprise", 9 December 2025 (about 500 US decision-makers). <a href="https://menlovc.com/perspective/2025-the-state-of-generative-ai-in-the-enterprise/">menlovc.com</a></p>
+<p class="cav"><span class="tag flag">Caveat</span>This is still the latest edition. The next annual report is expected around December 2026. Figures from it should not be re-dated to 2026.</p></div>
+<div class="card"><h4>AI spend is now managed</h4>
+<p>98% of respondents now manage AI spend, against 63% in the 2025 survey and 31% two years earlier. Workload optimization and waste reduction remain the single top current priority, FinOps for AI is the top forward-looking priority, and AI cost management is the number one skill teams need to develop. The report adds that, collectively, scope expansion, governance, alignment and forecasting now outweigh optimization alone.</p>
+<p class="meta">FinOps Foundation, "State of FinOps 2026" (sixth annual survey; 1,192 respondents; over $83 billion in annual cloud spend), 19 February 2026. <a href="https://data.finops.org/">data.finops.org</a></p></div>
+<div class="card"><h4>Identical models, dispersed prices</h4>
+<p>The authors report persistent price differences across and within intelligence tiers, with open-source models 90% cheaper than comparable closed models of the same intelligence. Some models are served by more than 20 providers, and inference providers grew from 27 to 90 during 2025.</p>
+<p class="meta">Demirer, Fradkin, Tadelis and Peng, "The Emerging Market for Intelligence", 12 December 2025 (OpenRouter and Azure data). <a href="https://andreyfradkin.com/assets/LLM_Demand_12_12_2025.pdf">Paper (PDF)</a></p></div>
+<div class="card"><h4>Cost per outcome governs, and 93% are over budget</h4>
+<p>About 60% of an agentic task's cost is tied to refining answers, the same task can vary by a factor of 30 between completions, and agentic tasks can consume roughly 1,000 times more tokens than chat tasks. 93% of McKinsey's survey respondents report exceeding AI budgets.</p>
+<p class="meta">McKinsey &amp; Company, "Is that AI agent worth it? Agentic economics and the modern operating model", 2026. <a href="https://www.mckinsey.com/capabilities/quantumblack/our-insights/is-that-ai-agent-worth-it-agentic-economics-and-the-modern-operating-model">mckinsey.com</a></p></div>
+<div class="card"><h4>The author's earlier measurements</h4>
+<p>Eight self-hosted open models, plus API models for comparison, measured on three workloads, with accuracy per dollar as the measure. Qwen2.5-Coder-7B scored 93.3% (14 of 15) on document Q&amp;A at $0.0165 per 1k queries, and 77.5% on Text2SQL (Spider dev, 1,034 questions, execution accuracy) at $0.0110 per 1k queries. The highest raw accuracy on Text2SQL was an API model at 80.6%, at roughly 6.5 times the cost per query. gpt-oss-20b scored 96.7% (29 of 30) on support and tool calling at $0.0298 per 1k queries.</p>
+<p class="meta">"A Cost-Per-Outcome Framework for Choosing AI Models", Medium, 18 October 2026. <a href="https://medium.com/@harishparam/a-cost-per-outcome-framework-for-choosing-ai-models-6da36fb478ee">medium.com</a>. Code and data: <a href="https://github.com/hariparam81/inference-economics-workbench">inference-economics-workbench</a>.</p>
+<p class="cav">Self-hosted runs used a rented RTX 4090 on Secure Cloud at $0.89 per hour, the same card and rate as this proof of concept. Cost per query assumes a fully busy GPU.</p></div>
+</div>
+</section>
+
+<!-- 4 POC -->
+<section id="poc">
+<h2><span class="n">4</span>The proof of concept in full</h2>
+<p>Run on 28 and 29 October 2026 (UTC). The infrastructure was destroyed at teardown, so the exports and results in the repository are the only evidence that exists. Everything below comes from the run report and those files.</p>
+
+<h3 id="architecture-built">4.1 Architecture as built</h3>
+<table class="rt">
+<thead><tr><th>Component</th><th>What it was</th><th>What it did</th></tr></thead>
+<tbody>
+<tr><td data-label="Component">Inference endpoint</td><td data-label="What it was">A RunPod pod with one RTX 4090 on Secure Cloud</td><td data-label="What it did">vLLM 0.10.2 serving Qwen/Qwen2.5-Coder-7B-Instruct, API key required, prefix caching on</td></tr>
+<tr><td data-label="Component">Gateway host</td><td data-label="What it was">A DigitalOcean droplet (4 GB, Ubuntu 24.04) running Docker Compose</td><td data-label="What it did">Hosted every component below</td></tr>
+<tr><td data-label="Component">TLS and routing</td><td data-label="What it was">Caddy 2.8.4</td><td data-label="What it did">Proxied <code>/v1/*</code> only; every other path returned 404</td></tr>
+<tr><td data-label="Component">Auth shim</td><td data-label="What it was">FastAPI and PyJWT, 236 lines</td><td data-label="What it did">Resolved the principal, overwrote <code>cache_salt</code>, capped <code>max_tokens</code> at 512, forwarded with the principal's key, wrote one audit row per call</td></tr>
+<tr><td data-label="Component">Model gateway</td><td data-label="What it was">LiteLLM OSS v1.105.7</td><td data-label="What it did">Virtual keys, budgets, rate limits, spend log</td></tr>
+<tr><td data-label="Component">Database</td><td data-label="What it was">Postgres 16.4</td><td data-label="What it did">LiteLLM tables plus the shim's audit table</td></tr>
+<tr><td data-label="Component">Egress control</td><td data-label="What it was">Default-deny rules on the droplet</td><td data-label="What it did">Limited what each container could reach</td></tr>
+<tr><td data-label="Component">Identity provider</td><td data-label="What it was">ZITADEL Cloud, free tier</td><td data-label="What it did">Issued Tenant B's user and agent tokens</td></tr>
+<tr><td data-label="Component">Agent</td><td data-label="What it was">A script on the operator's laptop</td><td data-label="What it did">Acted for Tenant B's user through the public front door</td></tr>
+</tbody></table>
+<p>The public name was a free DNS subdomain, in place of a domain of my own. Caddy obtained a Let's Encrypt certificate through the ACME egress allowance on first start. Only Caddy published host ports (80 and 443), and LiteLLM published none. Containers had static addresses on one internal network, so the egress rules could match them by source address. Spend logs stored no prompt or response bodies.</p>
+
+<h3 id="networking">4.2 The pod networking path and egress placement</h3>
+<p>The pod was reached through a public IP with a TCP port mapping to container port 8000, which was the preferred RunPod path. The overlay network (Tailscale) was prepared and not needed. The proxy hostname that RunPod also offers was not used.</p>
+<p><strong>Enforcement.</strong> The gate was vLLM's <code>--api-key</code>. From the droplet, an unauthenticated model-list call returned 401, an unauthenticated chat call returned 401, a wrong key returned 401, and the correct key returned 200 with the one model and a 16,384-token context. The <code>/health</code> path answered 200 without a key, because vLLM does not protect it. The port was reachable from the public internet, the API key was the only gate, and RunPod offers no IP allowlist. For that reason, "tenants never reach the pod directly" rests on the key and on tenants never holding it.</p>
+<p><strong>Egress placement.</strong> Rules sat on the droplet in the <code>DOCKER-USER</code> chain, through a dedicated chain, matched by source container:</p>
+<table class="rt">
+<thead><tr><th>Source</th><th>Allowed destination</th></tr></thead>
+<tbody>
+<tr><td data-label="Source">LiteLLM</td><td data-label="Allowed destination">The pod's address and port only</td></tr>
+<tr><td data-label="Source">Shim</td><td data-label="Allowed destination">The identity provider's hostnames, on port 443, through a hostname set</td></tr>
+<tr><td data-label="Source">Caddy</td><td data-label="Allowed destination">The certificate authority's hostnames, on port 443</td></tr>
+<tr><td data-label="Source">All containers</td><td data-label="Allowed destination">The droplet's upstream resolver on port 53, and the internal subnet</td></tr>
+<tr><td data-label="Source">Everything else</td><td data-label="Allowed destination">Rejected</td></tr>
+</tbody></table>
+<p>Hostnames resolved into address sets that refreshed at boot, every 15 minutes and before each demo run. Inbound traffic to published ports was not filtered by this chain, and the droplet host itself was not filtered, because setup needed package registries. Only container egress was default-deny. Checks from throwaway containers with the static addresses: the shim reached the identity provider (302) and was blocked from <code>example.com</code> and from the pod; LiteLLM reached the pod's <code>/health</code> (200) and was blocked from <code>example.com</code>; Caddy reached the ACME directory (200) and was blocked from the identity provider's domain.</p>
+
+<h3 id="phase0">4.3 Preflight findings</h3>
+<h4>The pod</h4>
+<ul>
+<li>Community Cloud had no host with CUDA 12.8 or newer: a create with that minimum returned "no longer any instances available", and a live capacity read showed only host CUDA 12.2. The Secure Cloud fallback was used, in data center US-IL-1 with host CUDA 13.2 and 50 GB of container disk.</li>
+<li>Price: $0.89 per hour for compute plus $0.007 per hour for container storage, $0.897 per hour in all (the console shows $0.90).</li>
+<li>Image <code>vllm/vllm-openai:v0.10.2</code>. Flags: <code>--max-model-len 16384 --enable-prefix-caching --enable-prompt-tokens-details</code>, with the API key passed as an environment value. The version supports <code>cache_salt</code> (0.9.0 and later).</li>
+<li>A first pod was stopped and then terminated at the operator's console without ever reaching a running container, and an identical pod replaced it. The operator confirmed the replacement from a console screenshot. Its billed cost is in the ledger.</li>
+</ul>
+<h4>Cache checks, direct to the pod</h4>
+<p>Paper 1908.05828 as the system prefix (4,447 prompt tokens), question 1, <code>max_tokens</code> 1, temperature 0.</p>
+<table class="rt">
+<thead><tr><th>Call</th><th>Salt</th><th class="num">Seconds</th><th class="num">Prompt tokens</th><th class="num">Cached tokens</th></tr></thead>
+<tbody>
+<tr><td data-label="Call">First</td><td data-label="Salt">A</td><td class="num" data-label="Seconds">3.383</td><td class="num" data-label="Prompt tokens">4,447</td><td class="num" data-label="Cached tokens">absent (0)</td></tr>
+<tr><td data-label="Call">Second</td><td data-label="Salt">A</td><td class="num" data-label="Seconds">0.252</td><td class="num" data-label="Prompt tokens">4,447</td><td class="num" data-label="Cached tokens">4,432</td></tr>
+<tr><td data-label="Call">First</td><td data-label="Salt">B</td><td class="num" data-label="Seconds">1.347</td><td class="num" data-label="Prompt tokens">4,447</td><td class="num" data-label="Cached tokens">absent (0)</td></tr>
+<tr><td data-label="Call">Second</td><td data-label="Salt">B</td><td class="num" data-label="Seconds">0.262</td><td class="num" data-label="Prompt tokens">4,447</td><td class="num" data-label="Cached tokens">4,432</td></tr>
+</tbody></table>
+<p>The cached-token count appears in the usage field, and salts separate: salt B's first call, issued after salt A had warmed the same prefix, reports no cached tokens. vLLM omits the field when the count is 0. As a time-to-first-token proxy (wall time of a one-token call, five repeats, a fresh salt for cold) the cold median was 0.697 s and the warm median 0.659 s. The warm repeats were noisy (0.659, 0.84, 0.777, 0.284, 0.26 s). At a prefix of about 4.4k tokens, prefill is fast on a 4090 and the timing signal is weak, so cached-token counts are the primary evidence.</p>
+
+<h4>The price derivation</h4>
+<p>All 33 workload questions ran sequentially from the droplet against the pod, with one salt, <code>max_tokens</code> 256, which are the demo conditions. The run took 96.67 seconds of wall time and used 119,269 prompt tokens (108,000 cached) and 2,161 completion tokens, 121,430 in all. That is 4,522,034 tokens per hour. Dividing $0.897 per hour by that rate gives $1.9836e-07 per token, about $0.198 per million tokens, applied as one blended rate to input and output tokens, cached tokens included. One workload call at that point was estimated at about 3,680 tokens and $0.00073. The price rests on one sequential client and a mostly cached prefix, so it is a flat-rate allocation of the pod's hourly cost.</p>
+
+<h4>The workload</h4>
+<p>33 questions across papers 1908.05828 (12), 1910.06592 (11) and 1902.09666 (10) from the QASPER validation split. Source: the <code>allenai/qasper</code> parquet conversion at commit <code>06806e4608976fc2fac0a090ac425d5b2b29caf4</code>, file <code>qasper/validation/0000.parquet</code>. The dataset card's license tag is CC BY 4.0, with credit to the Allen Institute for AI. The largest prompt estimate was 4,873 tokens, against a 16,384-token limit.</p>
+
+<h3 id="stack">4.4 The gateway stack and Tenant A</h3>
+<ul>
+<li><strong>Pinned images:</strong> Caddy 2.8.4, Postgres 16.4, LiteLLM v1.105.7, and a shim built from <code>python:3.12.7-slim</code> with fastapi 0.115.2, uvicorn 0.32.0, httpx 0.27.2, psycopg 3.2.3 and PyJWT 2.9.0. Health checks passed on all three services that had one. Memory after start was 1.2 GB of 3.9 GB, with 2 GB of swap present.</li>
+<li><strong>LiteLLM config:</strong> one model, the pod as backend, the derived price of 1.9836e-07 per token for input and output, response cache off, telemetry off.</li>
+<li><strong>The shim's factory-key path:</strong> the SHA-256 of the presented key is looked up in the registry to find the tenant and subject. Unknown or missing credentials returned 401 and were audited as rejected. Streaming requests returned 400 and were audited as rejected. A client-supplied <code>cache_salt</code> was dropped and replaced with the tenant's. A test-only switch could turn salting off, and it defaulted to on.</li>
+<li><strong>The audit join:</strong> the shim wrote an intent row before forwarding (tenant, identity mode, subject, actor, model, rejected flag and reason) and updated it afterward with the HTTP status and the response id. Cost and tokens join from the spend log on that response id. Rejections made by LiteLLM, such as a non-allowlisted model (403) or a budget refusal (422), are audited with the real status and a rejected flag of false, because only shim-level rejections carry the flag.</li>
+</ul>
+<h4>The full-chain exit gate</h4>
+<p>Paper 1910.06592 as the prefix (2,991 prompt tokens), <code>max_tokens</code> 8, through the public gateway. Tenant B's key here was a temporary factory key under the <code>tenant-b</code> salt, deleted afterward.</p>
+<table class="rt">
+<thead><tr><th>Call</th><th class="num">Cached tokens</th></tr></thead>
+<tbody>
+<tr><td data-label="Call">A first (cold)</td><td class="num" data-label="Cached tokens">absent (0)</td></tr>
+<tr><td data-label="Call">A second</td><td class="num" data-label="Cached tokens">2,976</td></tr>
+<tr><td data-label="Call">B first (other salt)</td><td class="num" data-label="Cached tokens">absent (0)</td></tr>
+<tr><td data-label="Call">B second</td><td class="num" data-label="Cached tokens">2,976</td></tr>
+<tr><td data-label="Call">A with a client-supplied <code>cache_salt</code></td><td class="num" data-label="Cached tokens">2,976 (supplied salt ignored, tenant salt applied)</td></tr>
+</tbody></table>
+<p>No response carried a LiteLLM cache header, because response caching was off.</p>
+<h4>Tenant A and the smoke tests</h4>
+<p>Tenant A's key was <code>tenant-a-batch</code>: model allowlist of the one model, a placeholder budget of $0.05 for one hour (resized for each demo), 60 requests per minute, 300,000 tokens per minute. Three workload calls returned 200 and logged nonzero spend of $0.000891, $0.000890 and $0.000891, each joined to an audit row (4,492, 4,487 and 4,491 total tokens). Per-call cost came out at about $0.00089, higher than the preflight estimate of $0.00073, because the prompts shown were longer. A request for <code>gpt-4o</code> with Tenant A's key returned 403 <code>key_model_access_denied</code>. A streaming request returned 400, and a call with no credentials returned 401.</p>
+
+<h3 id="federation-facts">4.5 Federation and the identity tests</h3>
+<ul>
+<li><strong>ZITADEL setup:</strong> one organisation, one project, one device-code application, a machine user named <code>agent</code> and a demo user with a dedicated email address. The organisation domain used for login names is a separate value from the instance domain that serves as the issuer.</li>
+<li><strong>Token settings:</strong> access tokens default to opaque, and opaque tokens cannot be validated by the shim, so the type was set to JWT on both the application and the machine user. Tokens were RS256 with a key id and a 12-hour lifetime. The refresh-token grant had to be enabled on the application, because the first renewal returned <code>unauthorized_client</code>.</li>
+<li><strong>Token exchange:</strong> the instance's discovery document did not list the token-exchange grant, so it was not used. The shim-minted delegation token was the path used.</li>
+<li><strong>Tenant B in LiteLLM:</strong> a team with a $0.20 budget over one day and the one-model allowlist, holding two keys, <code>tenant-b-user</code> (60 requests per minute) and <code>tenant-b-agent</code> (6 requests per minute), each with 300,000 tokens per minute and a two-day expiry.</li>
+<li><strong>The first agent run:</strong> 3 questions on paper 1902.09666, three calls with status 200, a brief written, per-question F1 of 0.46, 0.17 and 1.00.</li>
+</ul>
+<h4>Team budget check (a disposable team, deleted afterward)</h4>
+<p>A team with a $0.0015 cap and two keys. Key 1's first call returned 200 and key 2's call returned 200. Then key 1's third call and key 2's fourth call both returned 422 <code>budget_exceeded</code>, with team cost at $0.00180071 against the cap. The team-level budget enforces across keys in LiteLLM v1.105.7, and no per-key fallback was needed. The error text reads "Max budget: 0", a display quirk, since the cap did enforce. An earlier run used prompts too short to reach the cap and showed no block, so it was repeated with larger prompts.</p>
+<h4>Negative and positive tests through the public gateway</h4>
+<p>All 11 passed on the final run.</p>
+<table class="rt">
+<thead><tr><th>Case</th><th>Result</th></tr></thead>
+<tbody>
+<tr><td data-label="Case">Federated user call</td><td data-label="Result">200</td></tr>
+<tr><td data-label="Case">Delegation mint (user plus agent)</td><td data-label="Result">200</td></tr>
+<tr><td data-label="Case">Delegated agent call</td><td data-label="Result">200</td></tr>
+<tr><td data-label="Case">No token</td><td data-label="Result">401 <code>unauthenticated</code></td></tr>
+<tr><td data-label="Case">Unregistered issuer</td><td data-label="Result">401 <code>unregistered_issuer</code></td></tr>
+<tr><td data-label="Case">Tampered payload (real token, altered subject)</td><td data-label="Result">401 <code>invalid_token</code></td></tr>
+<tr><td data-label="Case">Disallowed algorithm (HS256 under the real issuer)</td><td data-label="Result">401 <code>algorithm_not_allowed</code></td></tr>
+<tr><td data-label="Case">Tenant claimed by header only (<code>X-Tenant</code>)</td><td data-label="Result">401 <code>unauthenticated</code></td></tr>
+<tr><td data-label="Case">Tenant A key plus <code>X-Tenant: tenant-b</code></td><td data-label="Result">200, recorded as tenant-a (header ignored)</td></tr>
+<tr><td data-label="Case">Expired token</td><td data-label="Result">401 <code>token_expired</code></td></tr>
+<tr><td data-label="Case">Wrong audience</td><td data-label="Result">401 <code>wrong_audience</code></td></tr>
+</tbody></table>
+<p><strong>Method note.</strong> ZITADEL cannot issue an expired token, and it always adds the project to the audience of tokens for an app in that project, so a real wrong-audience token could not be minted. A first attempt with a narrower scope was still accepted, because the project stays in the audience. Expiry and wrong audience were therefore exercised through a temporary registered test issuer: an RSA key generated for the run, its key set served from a throwaway container on the internal network, removed afterward with the registry restored and confirmed. Every rejection appears in the audit table with the rejected flag and its reason. Rejections that resolved no principal carry no tenant.</p>
+
+<h3 id="demos">4.6 The four demos</h3>
+<p>Raw per-call files are under <code>results/</code>, and demo state changes are in <code>results/demo-state.log</code>.</p>
+
+<h4 id="d1">D1: the budget cap fires mid-work</h4>
+<p>Tenant A's key was given a budget of $0.0143, sized from per-call cost so that the stop would land between 40% and 70% of the 33-question batch (the whole workload costs about $0.024). The batch ran one call at a time from the operator's laptop through the public URL, and stopped at the first non-200 response.</p>
+<ul>
+<li>18 questions were answered (54.5%). Question 19 returned HTTP 422 <code>budget_exceeded</code>.</li>
+<li>Per-call cost headers sum to $0.014329. The key's recorded spend is $0.0143285346. The spend log has 19 rows summing to $0.014329: 18 completed calls plus the refused call at zero spend.</li>
+<li>The last accepted call, costing $0.0006010308, crossed the cap by $0.000029, 0.2% of the cap. The overshoot was one call, as expected for a sequential batch, and no call ran after the cap was exceeded.</li>
+<li>Scored on the 18 answered: 15 text answers (mean token F1 0.391), 2 yes/no correct of 2, 1 gold-unanswerable question that the model declared unanswerable.</li>
+</ul>
+<p>The rejection, verbatim from the last line of <code>results/d1/tenant_a_d1.jsonl</code>:</p>
+<pre class="wrap">{"paper_id": "1910.06592", "question_id": "483a699563efcb8804e1861b18809279f21c7610", "http_status": 422, "seconds": 0.376, "error": {"message": "Budget has been exceeded! Key=tenant-a-batch (sk-...NNjw) Current cost: 0.014328534600000003, Max budget: 0.0143", "type": "budget_exceeded", "param": null, "code": "422"}}</pre>
+
+<h4 id="d2">D2: cache isolation</h4>
+<p>The designated paper was 1908.05828 (4,417 paper tokens, 12 questions, 4,481 prompt tokens per call), with <code>max_tokens</code> 16 and temperature 0. Every call carried the full paper as the prefix plus one question. Within a pass, calls after the first share the prefix under the same salt, so the isolation evidence is each tenant's first call of its first pass. The main sequence ran after a vLLM restart that emptied the cache, with salting on. The control sequence ran after a second restart, with the shim's test-only switch turned off, and the switch was turned back on afterward.</p>
+<table class="rt">
+<thead><tr><th>Sequence</th><th>Pass</th><th class="num">First call cached tokens</th><th class="num">Pass cached share</th></tr></thead>
+<tbody>
+<tr><td data-label="Sequence">Main, salting on, cold cache</td><td data-label="Pass">Tenant A first pass</td><td class="num" data-label="First call cached tokens">0 of 4,481</td><td class="num" data-label="Pass cached share">91.2% (49,104 of 53,820)</td></tr>
+<tr><td data-label="Sequence">Main</td><td data-label="Pass">Tenant B first pass, after A had warmed its own cache</td><td class="num" data-label="First call cached tokens"><strong>0 of 4,481</strong></td><td class="num" data-label="Pass cached share">91.2%</td></tr>
+<tr><td data-label="Sequence">Main</td><td data-label="Pass">Tenant B repeats 1 to 5</td><td class="num" data-label="First call cached tokens">4,480 of 4,481 each</td><td class="num" data-label="Pass cached share">99.9% each</td></tr>
+<tr><td data-label="Sequence">Main</td><td data-label="Pass">Tenant A repeats 1 to 5 (rerun)</td><td class="num" data-label="First call cached tokens">4,480 of 4,481 each</td><td class="num" data-label="Pass cached share">99.9% each</td></tr>
+<tr><td data-label="Sequence">Control, salting off, cold cache</td><td data-label="Pass">Tenant A first pass</td><td class="num" data-label="First call cached tokens">0 of 4,481</td><td class="num" data-label="Pass cached share">91.2%</td></tr>
+<tr><td data-label="Sequence">Control</td><td data-label="Pass">Tenant B first pass</td><td class="num" data-label="First call cached tokens"><strong>4,480 of 4,481</strong></td><td class="num" data-label="Pass cached share">99.9%</td></tr>
+</tbody></table>
+<p>The comparison that carries the claim: Tenant B's first call reads 0 cached tokens when salting is on and 4,480 of 4,481 when salting is off.</p>
+<p><strong>Timings, secondary.</strong> First calls took 5.39 s (A, cold, the first request after a restart), 1.576 s (B, salted, with the other tenant warm), 5.762 s (control A, cold) and 1.227 s (control B, unsalted, warm). Across the five repeat passes, the median of the per-pass median call latencies was 0.969 s for Tenant B and 1.028 s for Tenant A. Every call includes the round trip from the operator's laptop through Caddy, the shim and LiteLLM, about one second end to end, so the prefill difference is hard to see in wall time at this prefix size. First passes are single measurements.</p>
+<p><strong>A setup failure, excluded from the results.</strong> Tenant A's key hit its $0.05 cap during the first set of repeat passes, because a 12-call pass costs about $0.0107 (cached tokens are priced at the same blended rate). Repeat 4 had refusals and repeat 5 was refused entirely. The budget was raised to $1.00 and all five of A's repeat passes were rerun, with the earlier files kept in <code>results/d2/superseded/</code>. The 15 resulting 422 responses appear in the D4 output as Tenant A's non-OK calls.</p>
+<details><summary>Full per-pass table from results/d2/summary.md</summary>
+<table class="rt">
+<thead><tr><th>Pass</th><th>First call cached/prompt tokens</th><th class="num">First call seconds</th><th>Pass cached share</th><th class="num">Median call seconds</th></tr></thead>
+<tbody>
+<tr><td data-label="Pass">a_pass1</td><td data-label="First call cached/prompt tokens">0/4481</td><td class="num" data-label="First call seconds">5.39</td><td data-label="Pass cached share">49104/53820 (91.2%)</td><td class="num" data-label="Median call seconds">1.054</td></tr>
+<tr><td data-label="Pass">b_pass1</td><td data-label="First call cached/prompt tokens">0/4481</td><td class="num" data-label="First call seconds">1.576</td><td data-label="Pass cached share">49104/53820 (91.2%)</td><td class="num" data-label="Median call seconds">1.071</td></tr>
+<tr><td data-label="Pass">b_repeat1</td><td data-label="First call cached/prompt tokens">4480/4481</td><td class="num" data-label="First call seconds">1.045</td><td data-label="Pass cached share">53744/53820 (99.9%)</td><td class="num" data-label="Median call seconds">0.969</td></tr>
+<tr><td data-label="Pass">b_repeat2</td><td data-label="First call cached/prompt tokens">4480/4481</td><td class="num" data-label="First call seconds">1.138</td><td data-label="Pass cached share">53744/53820 (99.9%)</td><td class="num" data-label="Median call seconds">1.081</td></tr>
+<tr><td data-label="Pass">b_repeat3</td><td data-label="First call cached/prompt tokens">4480/4481</td><td class="num" data-label="First call seconds">1.01</td><td data-label="Pass cached share">53744/53820 (99.9%)</td><td class="num" data-label="Median call seconds">0.969</td></tr>
+<tr><td data-label="Pass">b_repeat4</td><td data-label="First call cached/prompt tokens">4480/4481</td><td class="num" data-label="First call seconds">1.08</td><td data-label="Pass cached share">53744/53820 (99.9%)</td><td class="num" data-label="Median call seconds">1.000</td></tr>
+<tr><td data-label="Pass">b_repeat5</td><td data-label="First call cached/prompt tokens">4480/4481</td><td class="num" data-label="First call seconds">1.006</td><td data-label="Pass cached share">53744/53820 (99.9%)</td><td class="num" data-label="Median call seconds">0.960</td></tr>
+<tr><td data-label="Pass">a_repeat1</td><td data-label="First call cached/prompt tokens">4480/4481</td><td class="num" data-label="First call seconds">1.253</td><td data-label="Pass cached share">53744/53820 (99.9%)</td><td class="num" data-label="Median call seconds">1.028</td></tr>
+<tr><td data-label="Pass">a_repeat2</td><td data-label="First call cached/prompt tokens">4480/4481</td><td class="num" data-label="First call seconds">0.957</td><td data-label="Pass cached share">53744/53820 (99.9%)</td><td class="num" data-label="Median call seconds">1.132</td></tr>
+<tr><td data-label="Pass">a_repeat3</td><td data-label="First call cached/prompt tokens">4480/4481</td><td class="num" data-label="First call seconds">1.088</td><td data-label="Pass cached share">53744/53820 (99.9%)</td><td class="num" data-label="Median call seconds">1.026</td></tr>
+<tr><td data-label="Pass">a_repeat4</td><td data-label="First call cached/prompt tokens">4480/4481</td><td class="num" data-label="First call seconds">1.086</td><td data-label="Pass cached share">53744/53820 (99.9%)</td><td class="num" data-label="Median call seconds">0.992</td></tr>
+<tr><td data-label="Pass">a_repeat5</td><td data-label="First call cached/prompt tokens">4480/4481</td><td class="num" data-label="First call seconds">1.181</td><td data-label="Pass cached share">53744/53820 (99.9%)</td><td class="num" data-label="Median call seconds">1.052</td></tr>
+<tr><td data-label="Pass">c_a_pass1</td><td data-label="First call cached/prompt tokens">0/4481</td><td class="num" data-label="First call seconds">5.762</td><td data-label="Pass cached share">49104/53820 (91.2%)</td><td class="num" data-label="Median call seconds">1.913</td></tr>
+<tr><td data-label="Pass">c_b_pass1</td><td data-label="First call cached/prompt tokens">4480/4481</td><td class="num" data-label="First call seconds">1.227</td><td data-label="Pass cached share">53744/53820 (99.9%)</td><td class="num" data-label="Median call seconds">1.076</td></tr>
+</tbody></table>
+<p class="small">Tenant B repeat passes: median of the five per-pass median latencies is 0.969 s (per-pass medians 0.969, 1.081, 0.969, 1.0, 0.96). Tenant A repeat passes: 1.028 s (1.028, 1.132, 1.026, 0.992, 1.052). Rows prefixed c are the control sequence.</p>
+</details>
+
+<h4 id="d3">D3: the agent under delegation</h4>
+<p>The agent obtained a delegated token (subject the demo user, actor the agent, tenant <code>tenant-b</code>, lifetime 300 s) and answered 3 questions on paper 1902.09666. After a 65-second pause, it looped rapid calls: calls 1 to 6 returned 200 and call 7 returned <strong>429</strong>, since the agent key allows 6 requests per minute. During the throttling, one plain Tenant B user call, made with the user key, returned <strong>200</strong>.</p>
+<p>The team's spend rose from $0.07691528016 to $0.0789631488, a delta of $0.00204787, which equals the completed-call spend rows in the window to the last digit: the agent key's 10 rows summed to $0.00204093 and the user key's 1 row to $0.00000694. The 429 call produced a zero-spend row, so the throttled call added nothing to the team's spend. Audit rows in the window for Tenant B: <code>delegation_mint</code> 200 twice, <code>delegated_agent</code> 200 nine times and 429 once, <code>federated_user</code> 200 once.</p>
+<pre class="wrap">delegated token: sub = 397175765415756585 | act = {'sub': '397177372589197218'} | tenant = tenant-b | ttl s = 300
+agent call 1: 200
+agent call 2: 200
+agent call 3: 200
+agent call 4: 200
+agent call 5: 200
+agent call 6: 200
+agent call 7: 429
+rate limit hit on call 7
+plain user call during agent throttling: 200</pre>
+<details><summary>Verbatim team and key spend check (results/d3/team_budget_check.txt)</summary>
+<pre>-- team and key spend after
+ team_alias |    spend     | max_budget
+------------+--------------+------------
+ tenant-b   | 0.0789631488 |        0.2
+(1 row)
+
+   key_alias    |     spend
+----------------+---------------
+ tenant-b-agent | 0.00404694072
+ tenant-b-user  | 0.07491620808
+(2 rows)
+
+-- completed calls in the D3 window (spend log rows by key)
+   key_alias    | calls | spend_sum
+----------------+-------+------------
+ tenant-b-agent |    10 | 0.00204093
+ tenant-b-user  |     1 | 0.00000694
+(2 rows)
+
+-- audit rows in the D3 window by mode and status
+  identity_mode  | http_status | count
+-----------------+-------------+-------
+ delegated_agent |         200 |     9
+ delegated_agent |         429 |     1
+ delegation_mint |         200 |     2
+ federated_user  |         200 |     1
+(4 rows)</pre>
+</details>
+
+<h4 id="d4">D4: audit reconstruction</h4>
+<p>One query over the window from the start of D1 to the end of D3, which includes D2, groups every call by tenant, identity mode, subject and actor. Audit rows join to the spend log on the response id, so calls refused before or by LiteLLM have no spend row.</p>
+<table class="rt">
+<thead><tr><th>Tenant</th><th>Identity mode</th><th>Subject</th><th>Actor</th><th class="num">Calls</th><th class="num">OK</th><th class="num">Not OK</th><th class="num">Total tokens</th><th class="num">Cost USD</th></tr></thead>
+<tbody>
+<tr><td data-label="Tenant">tenant-a</td><td data-label="Identity mode">factory_key</td><td data-label="Subject">tenant-a-batch</td><td data-label="Actor">-</td><td class="num" data-label="Calls">163</td><td class="num" data-label="OK">147</td><td class="num" data-label="Not OK">16</td><td class="num" data-label="Total tokens">652,019</td><td class="num" data-label="Cost USD">0.129334</td></tr>
+<tr><td data-label="Tenant">tenant-b</td><td data-label="Identity mode">delegated_agent</td><td data-label="Subject">397175765415756585</td><td data-label="Actor">397177372589197218</td><td class="num" data-label="Calls">10</td><td class="num" data-label="OK">9</td><td class="num" data-label="Not OK">1</td><td class="num" data-label="Total tokens">10,289</td><td class="num" data-label="Cost USD">0.002041</td></tr>
+<tr><td data-label="Tenant">tenant-b</td><td data-label="Identity mode">delegation_mint</td><td data-label="Subject">397175765415756585</td><td data-label="Actor">397177372589197218</td><td class="num" data-label="Calls">2</td><td class="num" data-label="OK">2</td><td class="num" data-label="Not OK">0</td><td class="num" data-label="Total tokens">0</td><td class="num" data-label="Cost USD">0.000000</td></tr>
+<tr><td data-label="Tenant">tenant-b</td><td data-label="Identity mode">federated_user</td><td data-label="Subject">397175765415756585</td><td data-label="Actor">-</td><td class="num" data-label="Calls">84</td><td class="num" data-label="OK">84</td><td class="num" data-label="Not OK">0</td><td class="num" data-label="Total tokens">377,538</td><td class="num" data-label="Cost USD">0.074888</td></tr>
+<tr class="total"><td data-label="Tenant">Total</td><td data-label="Identity mode"></td><td data-label="Subject"></td><td data-label="Actor"></td><td class="num" data-label="Calls">259</td><td class="num" data-label="OK"></td><td class="num" data-label="Not OK"></td><td class="num" data-label="Total tokens">1,039,846</td><td class="num" data-label="Cost USD">0.206264</td></tr>
+</tbody></table>
+<ul>
+<li>Cross-check: LiteLLM's own spend log for the window holds 257 rows summing to $0.206264, which is the 259 audit calls minus the 2 delegation mints (they make no model call). 17 of those rows have zero spend: 16 Tenant A budget refusals and 1 agent rate-limit refusal.</li>
+<li>Not-OK outcomes inside the window: Tenant A 422 sixteen times (1 in D1 and 15 in the D2 setup failure) and the agent 429 once. LiteLLM made those refusals, so the shim's rejected flag is false for them.</li>
+<li>The 13 shim-level rejections from the identity tests (401, flagged rejected) are listed separately in the output. They carry the reasons <code>unauthenticated</code>, <code>unregistered_issuer</code>, <code>invalid_token</code>, <code>algorithm_not_allowed</code>, <code>token_expired</code> and <code>wrong_audience</code>.</li>
+</ul>
+<details><summary>Verbatim output (results/d4/audit_reconstruction.txt)</summary>
+<pre>  tenant  |  identity_mode  |      subject       |       actor        | calls | ok  | not_ok | prompt_tokens | completion_tokens | total_tokens | cost_usd
+----------+-----------------+--------------------+--------------------+-------+-----+--------+---------------+-------------------+--------------+----------
+ tenant-a | factory_key     | tenant-a-batch     | -                  |   163 | 147 |     16 |        650525 |              1494 |       652019 | 0.129334
+ tenant-b | delegated_agent | 397175765415756585 | 397177372589197218 |    10 |   9 |      1 |         10203 |                86 |        10289 | 0.002041
+ tenant-b | delegation_mint | 397175765415756585 | 397177372589197218 |     2 |   2 |      0 |             0 |                 0 |            0 | 0.000000
+ tenant-b | federated_user  | 397175765415756585 | -                  |    84 |  84 |      0 |        376740 |               798 |       377538 | 0.074888
+(4 rows)
+
+ calls | cost_usd | total_tokens
+-------+----------+--------------
+   259 | 0.206264 |      1039846
+(1 row)
+
+  tenant  |  identity_mode  | http_status | rejected |     reason     | count
+----------+-----------------+-------------+----------+----------------+-------
+ tenant-a | factory_key     |         422 | f        | (from LiteLLM) |    16
+ tenant-b | delegated_agent |         429 | f        | (from LiteLLM) |     1
+(2 rows)
+
+       at       |        reason         | http_status
+----------------+-----------------------+-------------
+ 10-29 00:18:20 | unauthenticated       |         401
+ 10-29 00:18:21 | unregistered_issuer   |         401
+ 10-29 00:18:22 | invalid_token         |         401
+ 10-29 00:18:22 | algorithm_not_allowed |         401
+ 10-29 00:18:22 | unauthenticated       |         401
+ 10-29 00:18:23 | token_expired         |         401
+ 10-29 00:18:53 | unauthenticated       |         401
+ 10-29 00:18:53 | unregistered_issuer   |         401
+ 10-29 00:18:54 | invalid_token         |         401
+ 10-29 00:18:54 | algorithm_not_allowed |         401
+ 10-29 00:18:54 | unauthenticated       |         401
+ 10-29 00:18:55 | token_expired         |         401
+ 10-29 00:18:56 | wrong_audience        |         401
+(13 rows)</pre>
+</details>
+
+<h3 id="qasper">4.7 The QASPER workload and scores</h3>
+<p>The full 33-question workload ran sequentially with <code>max_tokens</code> 128 and temperature 0, each tenant through its own identity path. These runs came after the D4 window, so they add 66 calls and about $0.048 that appear in the audit table but not in the D4 output.</p>
+<table class="rt">
+<thead><tr><th>Run</th><th class="num">Answered</th><th class="num">Mean token F1 (text answers)</th><th>Yes/no</th><th>Gold-unanswerable</th><th>Prompt tokens cached</th><th class="num">Cost USD</th></tr></thead>
+<tbody>
+<tr><td data-label="Run">Tenant A, factory key</td><td class="num" data-label="Answered">33 of 33</td><td class="num" data-label="Mean token F1 (text answers)">0.456 (n=29)</td><td data-label="Yes/no">3 of 3 correct</td><td data-label="Gold-unanswerable">1, declared unanswerable</td><td data-label="Prompt tokens cached">109,088 of 120,391 (90.6%)</td><td class="num" data-label="Cost USD">0.023986</td></tr>
+<tr><td data-label="Run">Tenant B, federated user</td><td class="num" data-label="Answered">33 of 33</td><td class="num" data-label="Mean token F1 (text answers)">0.457 (n=29)</td><td data-label="Yes/no">3 of 3 correct</td><td data-label="Gold-unanswerable">1, declared unanswerable</td><td data-label="Prompt tokens cached">112,416 of 120,391 (93.4%)</td><td class="num" data-label="Cost USD">0.023986</td></tr>
+<tr><td data-label="Run">D1 partial run</td><td class="num" data-label="Answered">18 of 19 attempted</td><td class="num" data-label="Mean token F1 (text answers)">0.391 (n=15)</td><td data-label="Yes/no">2 of 2 correct</td><td data-label="Gold-unanswerable">1, declared unanswerable</td><td data-label="Prompt tokens cached">68,704 of 71,971 (95.5%)</td><td class="num" data-label="Cost USD">0.014329</td></tr>
+</tbody></table>
+<p><strong>Scoring rule.</strong> Text questions use token F1 with SQuAD-style normalisation and the maximum over annotators. Yes/no questions are scored as accuracy and reported apart. Gold-unanswerable questions are reported as whether the model declared them unanswerable. The F1 values show that the workload ran. They make no model-quality claim, and they are not comparable to published leaderboard numbers, which used different prompts and models. QASPER is from the Allen Institute for AI under CC BY 4.0, and the served model is a 7B coder model.</p>
+<details><summary>Verbatim output (results/qasper/summary.txt)</summary>
+<pre>results/d1/tenant_a_d1.jsonl: 18/19 answered | text-answer set n=15 mean token F1=0.391 | yes/no n=2 correct=2 | unanswerable-gold n=1 model-said-unanswerable=1 | prompt tokens=71971 cached=68704 (95.5%) | cost=0.014329 USD
+results/qasper/a_full.jsonl: 33/33 answered | text-answer set n=29 mean token F1=0.456 | yes/no n=3 correct=3 | unanswerable-gold n=1 model-said-unanswerable=1 | prompt tokens=120391 cached=109088 (90.6%) | cost=0.023986 USD
+results/qasper/b_full.jsonl: 33/33 answered | text-answer set n=29 mean token F1=0.457 | yes/no n=3 correct=3 | unanswerable-gold n=1 model-said-unanswerable=1 | prompt tokens=120391 cached=112416 (93.4%) | cost=0.023986 USD</pre>
+</details>
+
+<h3 id="ledger">4.8 The complete cost ledger</h3>
+<p>Every figure traces to a bill, a log or a config. Rates come from the RunPod GPU-type read, the console and the DigitalOcean sizes API, and the hours come from the timestamps in the demo log, the preflight record and the RunPod audit log.</p>
+<table class="rt">
+<thead><tr><th>Item</th><th>Basis</th><th class="num">Cost USD</th></tr></thead>
+<tbody>
+<tr><td data-label="Item">RunPod pod 1</td><td data-label="Basis">RunPod billing API, record for 2026-10-28. It ran for about five minutes and never reached a running container.</td><td class="num" data-label="Cost USD">0.0742</td></tr>
+<tr><td data-label="Item">RunPod pod 2</td><td data-label="Basis">2.586 hours at $0.89 per hour compute plus $0.007 per hour container storage ($0.897 per hour), from creation to termination</td><td class="num" data-label="Cost USD">2.319</td></tr>
+<tr><td data-label="Item">DigitalOcean droplet</td><td data-label="Basis">2.693 hours at $0.03571 per hour (sizes API, $24 per month)</td><td class="num" data-label="Cost USD">0.096</td></tr>
+<tr><td data-label="Item">ZITADEL Cloud, free tier</td><td data-label="Basis">One organisation, one project, one application, one machine user</td><td class="num" data-label="Cost USD">0.00</td></tr>
+<tr><td data-label="Item">Tailscale</td><td data-label="Basis">Auth key prepared and not used</td><td class="num" data-label="Cost USD">0.00</td></tr>
+<tr><td data-label="Item">Domain</td><td data-label="Basis">A free DNS subdomain</td><td class="num" data-label="Cost USD">0.00</td></tr>
+<tr><td data-label="Item">GitHub</td><td data-label="Basis">Private repository during the build</td><td class="num" data-label="Cost USD">0.00</td></tr>
+<tr class="total"><td data-label="Item">Total</td><td data-label="Basis"></td><td class="num" data-label="Cost USD">about 2.49</td></tr>
+</tbody></table>
+<ul>
+<li>The RunPod billing API read after teardown reported $0.0742 for pod 1 and $1.4256 for pod 2, $1.4997 in all. The pod 2 figure lags real usage: the same totals appeared at two reads about six minutes apart while the pod ran for 2.59 hours. The pod 2 line above is rate times hours, and it should be replaced by the billing API's figure once the API catches up.</li>
+<li>The DigitalOcean invoice was not available at teardown, so the droplet line is rate times hours.</li>
+<li>The model price applied inside the gateway ($1.9836e-07 per token) meters spend in LiteLLM. Spend recorded in LiteLLM across the run is that metering and has no bearing on any bill.</li>
+</ul>
+
+<h3 id="pitfalls">4.9 Pitfalls and resolutions</h3>
+<ol>
+<li><strong>Community Cloud had no host with CUDA 12.8 or newer.</strong> The create failed with "no longer any instances available". Resolution: the Secure Cloud fallback.</li>
+<li><strong>The first pod was replaced at the operator's console.</strong> It was stopped and terminated, and an identical pod appeared minutes later. Resolution: the operator confirmed the replacement and it was adopted.</li>
+<li><strong>Slow first start.</strong> Image extraction, then the first model download and load, then a further wait after each restart for weights and compilation. Health polling must allow for it.</li>
+<li><strong>A pod restart reassigns the public TCP port.</strong> It changed three times across two restarts. Resolution: <code>gateway/ops/set-pod-port.sh</code> repoints LiteLLM and the egress rule, and each change is in the demo log. An early health poll had checked a stale port.</li>
+<li><strong>Wrong audit join key.</strong> LiteLLM's spend-log <code>request_id</code> is the response body id, and the <code>x-litellm-call-id</code> header holds a different value. Found at the first join and fixed in the shim. Five exit-gate rows pre-date the fix and have no spend attached.</li>
+<li><strong>ZITADEL access tokens were opaque by default.</strong> Resolution: access token type JWT on the application and on the machine user.</li>
+<li><strong>The refresh-token grant was not enabled</strong> on the device-code application. Resolution: enabled in the console.</li>
+<li><strong>Token exchange was not advertised by the instance.</strong> Resolution: the prepared fallback, a delegation token minted by the shim after validating both credentials.</li>
+<li><strong>ZITADEL cannot issue an expired token and always puts the project in the audience.</strong> Resolution: a temporary registered test issuer, removed afterward with the registry restored.</li>
+<li><strong>A mis-sized team budget test</strong> used prompts too short to reach the cap and showed no block. It was repeated with larger prompts. LiteLLM's error text reads "Max budget: 0" although the cap enforced.</li>
+<li><strong>The D2 setup failure.</strong> Cached tokens are priced at the blended rate, so a 12-call pass costs about $0.0107 and exhausted a $0.05 cap. Resolution: the budget was raised to $1.00 and the passes rerun, as section 4.6 describes.</li>
+<li><strong>Egress and DNS.</strong> Default-deny needed an explicit allowance for the droplet's resolver, and the resolver appeared three times in the resolver config, so the rules were deduplicated.</li>
+<li><strong>Environment values in a pod-create call are plain text.</strong> The vLLM API key passed that way sits in the build session's transcript. It was a throwaway key destroyed with the pod.</li>
+<li><strong>Billing API lag</strong> on the RunPod pod billing read, as section 4.8 describes.</li>
+</ol>
+
+<h3 id="scope">4.10 Scope</h3>
+<p>This proof of concept exercises the identity layer and the gateway layer. There is no sandbox layer: no consumer code executes on factory infrastructure, so the layer that would isolate tenant-supplied code was reserved, and nothing here supports or contradicts it. Identity paths A, B and C ran live (factory key, federated user, delegated agent), and path D exists as design only in the framework. One model was served. Calls were non-streaming, so streaming accounting is out of scope. The pod was reachable through a public TCP port protected by vLLM's API key only, with the droplet's egress rules pinning the pod address for the LiteLLM container. The delegation path used the shim fallback.</p>
+</section>
+
+<!-- 5 DELEGATED CALL -->
+<section id="delegated">
+<h2><span class="n">5</span>The delegated call</h2>
+<p>A user signs in at the tenant's identity provider. The agent presents the user's token and its own credential at the gateway. The gateway resolves the principal and stamps it on the request. The model serves the call, and the audit row records both identities.</p>
+<figure id="fig3">
+<svg role="img" aria-label="Diagram 3: one delegated call across five lanes, with the audit row from the run." xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 960" font-family="Arial, Helvetica, sans-serif"><defs><marker id="d3a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2F6FED"/></marker><marker id="d3g" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#6B7280"/></marker></defs><rect width="1200" height="960" fill="#FFFFFF"/><rect x="55" y="24" width="190" height="56" rx="14" fill="#F4F5F7" stroke="#D5D9E0" stroke-width="2"/><text x="150" y="61" font-size="26" font-weight="bold" fill="#1F2933" text-anchor="middle">User</text><line x1="150" y1="80" x2="150" y2="670" stroke="#D5D9E0" stroke-width="3" stroke-dasharray="3 9" stroke-linecap="round"/><rect x="280" y="24" width="190" height="56" rx="14" fill="#F4F5F7" stroke="#D5D9E0" stroke-width="2"/><text x="375" y="61" font-size="26" font-weight="bold" fill="#1F2933" text-anchor="middle">Agent</text><line x1="375" y1="80" x2="375" y2="670" stroke="#D5D9E0" stroke-width="3" stroke-dasharray="3 9" stroke-linecap="round"/><rect x="505" y="24" width="190" height="56" rx="14" fill="#F4F5F7" stroke="#D5D9E0" stroke-width="2"/><text x="600" y="61" font-size="26" font-weight="bold" fill="#1F2933" text-anchor="middle">IdP</text><line x1="600" y1="80" x2="600" y2="670" stroke="#D5D9E0" stroke-width="3" stroke-dasharray="3 9" stroke-linecap="round"/><rect x="730" y="24" width="190" height="56" rx="14" fill="#F4F5F7" stroke="#D5D9E0" stroke-width="2"/><text x="825" y="61" font-size="26" font-weight="bold" fill="#1F2933" text-anchor="middle">Gateway</text><line x1="825" y1="80" x2="825" y2="670" stroke="#D5D9E0" stroke-width="3" stroke-dasharray="3 9" stroke-linecap="round"/><rect x="955" y="24" width="190" height="56" rx="14" fill="#F4F5F7" stroke="#D5D9E0" stroke-width="2"/><text x="1050" y="61" font-size="26" font-weight="bold" fill="#1F2933" text-anchor="middle">Endpoint</text><line x1="1050" y1="80" x2="1050" y2="670" stroke="#D5D9E0" stroke-width="3" stroke-dasharray="3 9" stroke-linecap="round"/><path d="M150,160 L600,160" fill="none" stroke="#2F6FED" stroke-width="3" marker-end="url(#d3a)"/><text x="375" y="144" font-size="26" font-weight="bold" fill="#2F6FED" text-anchor="middle">1 Sign in</text><path d="M600,214 L150,214" fill="none" stroke="#6B7280" stroke-width="3" marker-end="url(#d3g)"/><text x="375" y="246" font-size="21" font-weight="normal" fill="#6B7280" text-anchor="middle">token</text><path d="M375,330 L825,330" fill="none" stroke="#2F6FED" stroke-width="3" marker-end="url(#d3a)"/><text x="600" y="314" font-size="26" font-weight="bold" fill="#2F6FED" text-anchor="middle">2 Exchange</text><rect x="715" y="420" width="220" height="74" rx="14" fill="#E8F0FE" stroke="#2F6FED" stroke-width="2"/><text x="825" y="464" font-size="23" font-weight="bold" fill="#1F2933" text-anchor="middle">3 Resolve + stamp</text><path d="M825,580 L1050,580" fill="none" stroke="#2F6FED" stroke-width="3" marker-end="url(#d3a)"/><text x="937" y="564" font-size="26" font-weight="bold" fill="#2F6FED" text-anchor="middle">4 Serve</text><path d="M1050,628 L825,628" fill="none" stroke="#6B7280" stroke-width="3" marker-end="url(#d3g)"/><text x="937" y="660" font-size="21" font-weight="normal" fill="#6B7280" text-anchor="middle">tokens</text><path d="M825,670 L825,716" fill="none" stroke="#2F6FED" stroke-width="3" stroke-dasharray="3 9" stroke-linecap="round" marker-end="url(#d3a)"/><rect x="40" y="716" width="1120" height="214" rx="18" fill="#FFFFFF" stroke="#2F6FED" stroke-width="3"/><text x="64" y="764" font-size="28" font-weight="bold" fill="#2F6FED" text-anchor="start">5 Audit row</text><rect x="968" y="734" width="168" height="40" rx="20" fill="#2F6FED" stroke="#2F6FED" stroke-width="0"/><text x="1052" y="762" font-size="21" font-weight="bold" fill="#FFFFFF" text-anchor="middle">Run evidence</text><text x="64" y="820" font-size="22" font-weight="normal" fill="#6B7280" text-anchor="start">tenant</text><text x="184" y="820" font-size="22" font-weight="bold" fill="#1F2933" text-anchor="start">tenant-b</text><text x="64" y="864" font-size="22" font-weight="normal" fill="#6B7280" text-anchor="start">mode</text><text x="184" y="864" font-size="22" font-weight="bold" fill="#1F2933" text-anchor="start">delegated_agent</text><text x="64" y="908" font-size="22" font-weight="normal" fill="#6B7280" text-anchor="start">status</text><text x="184" y="908" font-size="22" font-weight="bold" fill="#1F2933" text-anchor="start">200</text><text x="604" y="820" font-size="22" font-weight="normal" fill="#6B7280" text-anchor="start">subject</text><text x="724" y="820" font-size="22" font-weight="bold" fill="#1F2933" text-anchor="start">397175765415756585</text><text x="604" y="864" font-size="22" font-weight="normal" fill="#6B7280" text-anchor="start">actor</text><text x="724" y="864" font-size="22" font-weight="bold" fill="#1F2933" text-anchor="start">397177372589197218</text><text x="604" y="908" font-size="22" font-weight="normal" fill="#6B7280" text-anchor="start">model</text><text x="724" y="908" font-size="22" font-weight="bold" fill="#1F2933" text-anchor="start">Qwen2.5-Coder-7B</text></svg>
+<figcaption><strong>Diagram 3, one delegated call.</strong> Run evidence from the proof of concept across five lanes. The exchange step used the gateway's fallback: it validated the user's token and the agent's token, then minted a five-minute token with the user as subject and the agent as actor. The audit row shows tenant-b, mode delegated_agent, the user's subject id, the agent's id as actor and status 200.</figcaption>
+</figure>
+
+<table class="rt">
+<caption>The steps, with what each recorded in the run</caption>
+<thead><tr><th>Step</th><th>Lane</th><th>What happens</th><th>What the run recorded</th></tr></thead>
+<tbody>
+<tr><td data-label="Step">1 Sign in</td><td data-label="Lane">User, agent, identity provider</td><td data-label="What happens">The user approves a device-code login at the identity provider, and the agent renews the user's token from a stored refresh token. The agent obtains its own token with client credentials.</td><td data-label="What the run recorded">RS256 JWTs with a key id and a 43,200-second (12-hour) lifetime. The login ran once, approved in a browser by the demo user.</td></tr>
+<tr><td data-label="Step">2 Exchange</td><td data-label="Lane">Gateway (fallback in place of the identity provider)</td><td data-label="What happens">The agent calls <code>POST /v1/delegate</code> with the user's JWT as bearer and its own JWT in <code>X-Agent-Token</code>. The gateway validates both against the registered issuer (key set per issuer, asymmetric algorithms only, exact issuer, audience equal to the project id, expiry required). It requires the user's subject and the agent's subject to map to the same tenant in the operator registry. It returns an HS256 token with issuer <code>argus-shim-delegation</code>, audience <code>argus-gateway</code>, subject the user, <code>act.sub</code> the agent, and a 300-second lifetime.</td><td data-label="What the run recorded">Observed token: subject 397175765415756585, <code>act.sub</code> 397177372589197218, tenant <code>tenant-b</code>, lifetime 300 s. Two <code>delegation_mint</code> rows with status 200 in the audit table.</td></tr>
+<tr><td data-label="Step">3 Resolve and stamp</td><td data-label="Lane">Gateway</td><td data-label="What happens">The token resolves to identity mode <code>delegated_agent</code>, with the user as subject and the agent as actor. Tenant comes from the registry only, and an <code>X-Tenant</code> header is ignored. The shim overwrites <code>cache_salt</code>, caps <code>max_tokens</code> at 512 and writes the audit intent row before forwarding, using the agent's LiteLLM key.</td><td data-label="What the run recorded">The intent row exists before the model answers. The agent key carries a 6 requests-per-minute limit.</td></tr>
+<tr><td data-label="Step">4 Serve</td><td data-label="Lane">Endpoint</td><td data-label="What happens">LiteLLM checks the agent key's limits and Tenant B's team budget ($0.20 over one day), then forwards to vLLM. The response carries an id and a usage block.</td><td data-label="What the run recorded">The id becomes the join key. The team budget is charged, and the agent's rate limit applies on its own.</td></tr>
+<tr><td data-label="Step">5 Audit row</td><td data-label="Lane">Gateway and ledger</td><td data-label="What happens">The shim updates the intent row with the HTTP status and the response id. Tokens and cost join from the spend log on that id.</td><td data-label="What the run recorded">See the rows below.</td></tr>
+</tbody></table>
+
+<h3>Audit rows from the run</h3>
+<p>These two rows come from <code>exports/audit_joined.csv</code>. The first is the delegation request, which calls no model. The second is the first delegated model call that followed it, 0.3 seconds later.</p>
+<table class="rt">
+<thead><tr><th>Time (UTC)</th><th>Tenant</th><th>Identity mode</th><th>Subject</th><th>Actor</th><th class="num">Status</th><th class="num">Tokens (prompt, completion, total)</th><th class="num">Spend USD</th></tr></thead>
+<tbody>
+<tr><td data-label="Time (UTC)">2026-10-29 00:18:19.848</td><td data-label="Tenant">tenant-b</td><td data-label="Identity mode">delegation_mint</td><td data-label="Subject">397175765415756585</td><td data-label="Actor">397177372589197218</td><td class="num" data-label="Status">200</td><td class="num" data-label="Tokens (prompt, completion, total)">none</td><td class="num" data-label="Spend USD">none</td></tr>
+<tr><td data-label="Time (UTC)">2026-10-29 00:18:20.151</td><td data-label="Tenant">tenant-b</td><td data-label="Identity mode">delegated_agent</td><td data-label="Subject">397175765415756585</td><td data-label="Actor">397177372589197218</td><td class="num" data-label="Status">200</td><td class="num" data-label="Tokens (prompt, completion, total)">31, 4, 35</td><td class="num" data-label="Spend USD">0.0000069426</td></tr>
+</tbody></table>
+<p>Across the full window the agent's rows carry the user as subject and the agent as actor, and the audit reconstruction in section 4.6 attributes them separately from the same user's direct calls.</p>
+</section>
+
+<!-- 6 REPRODUCE -->
+<section id="reproduce">
+<h2><span class="n">6</span>Reproduce it</h2>
+<p>This is the condensed path. The configs are in <code>gateway/</code>, the client and test scripts in <code>clients/</code>, the workload in <code>workload/</code>, and the three prompts that drove the build in <code>prompts/</code>. <code>RUN-REPORT.md</code> holds the full record.</p>
+
+<h3>Accounts and resources</h3>
+<ul>
+<li>A GPU host that gives you a public TCP port or a private network path. The run used one RTX 4090 on RunPod Secure Cloud. Budget $0.897 per hour at the run's rate, and check current prices.</li>
+<li>A small VPS for the gateway: 2 vCPU and 4 GB are enough. The run used a DigitalOcean droplet at $0.03571 per hour ($24 per month). The framework notes that a cheaper VPS elsewhere costs about $5 to $6 per month.</li>
+<li>A free-tier OIDC identity provider for the demo tenant. The run used ZITADEL Cloud. Auth0's free plan and a self-hosted Keycloak are the other options the framework considered.</li>
+<li>A public DNS name pointing at the VPS (a free subdomain service worked), and a GitHub repository.</li>
+</ul>
+
+<h3>Order of operations</h3>
+<ol class="steps">
+<li><strong>Start the model.</strong> Launch the vLLM image at version 0.9.0 or later with prefix caching and prompt-token details on, a model length that fits your prompts, and an API key. Confirm that the usage field reports cached tokens, and that two salts separate. <code>workload/phase0_probe.py</code> does this check.</li>
+<li><strong>Derive the price.</strong> Run the workload sequentially against the pod, measure tokens per hour, and divide the hourly cost by it. Put the result in the LiteLLM config as the model's per-token price, or every budget will read $0.</li>
+<li><strong>Stand up the gateway.</strong> Copy <code>gateway/env.example</code> and <code>gateway/registry.template.json</code>, fill in secrets on the host only, and bring up <code>gateway/compose.yaml</code> (Caddy, shim, LiteLLM, Postgres). Apply the egress rules in <code>gateway/egress/</code>. Check that only <code>/v1/*</code> answers on the public name.</li>
+<li><strong>Add Tenant A.</strong> Create a LiteLLM virtual key with the model allowlist, a budget and rate limits, and register its hash. Run <code>clients/phase1_gate.py</code> to confirm the cache salts separate through the full chain.</li>
+<li><strong>Add the identity provider.</strong> Create the organisation, project, device-code application and machine user. Set the access-token type to JWT and enable the refresh-token grant. Register the issuer, audience, user and agent in the registry. Run <code>clients/phase2_negative.py</code> for the 11 checks.</li>
+<li><strong>Run the demos.</strong> Use <code>clients/tenant_a_batch.py</code> for D1, <code>clients/d2_cache.py</code> for D2, <code>clients/agent/agent.py</code> for D3, and the SQL in <code>results/d4/audit_reconstruction.sql</code> for D4. Restart the model server before each D2 sequence, and repoint the gateway if the public port changes (<code>gateway/ops/set-pod-port.sh</code>).</li>
+<li><strong>Export, then tear down.</strong> Export the audit and spend tables, redact configs, and then delete the pod, the droplet and the DNS record. Revoke any tokens you issued.</li>
+</ol>
+
+<h3>Expected cost</h3>
+<p>The run cost about $2.49 in all, as the ledger in section 4.8 shows: about $2.32 for the pod, $0.07 for the failed first pod and $0.10 for the droplet, with $0 for the identity provider, DNS and repository. The cost scales with the hours you leave things running, at $0.897 per hour for the pod and $0.03571 per hour for the droplet. Treat $2 to $3 as the range for a similar run, and the hourly rates as the way to scale it.</p>
+</section>
+
+<!-- 7 LIMITS -->
+<section id="limits">
+<h2><span class="n">7</span>Limits and open questions</h2>
+<p>Everything the sources flagged as unverified or open is carried here, together with the limits of the run.</p>
+
+<h3>Limits of the proof of concept</h3>
+<ul>
+<li>It exercised the identity and gateway layers. There is no sandbox layer, so this run says nothing about isolating tenant-supplied code.</li>
+<li>Three of four identity paths ran. The trial tier is design only.</li>
+<li>One model was served, one pod, with non-streaming calls. Streaming accounting is out of scope.</li>
+<li>The cache salt closes one channel. Tenants still share the scheduler and the GPU, and timing channels beyond the prefix cache are not closed. Dedicated instances are the stronger tier.</li>
+<li>The budget cap is near-hard. Spend is written after a call completes, so calls in flight can overshoot. In D1 the overshoot was one call, $0.000029.</li>
+<li>Time to first token did not separate cold from warm at a prefix of about 4.4k tokens. Cached-token counts carry the result, and a timing demonstration needs a longer prefix and more repeats.</li>
+<li>The pod was reachable on a public port gated only by the vLLM API key. The claim that tenants never reach the pod directly rests on that key.</li>
+<li>The delegation token used the gateway's fallback. The identity provider's own token exchange and a tenant's real corporate provider are untested.</li>
+<li>The price is a flat-rate allocation that rests on one sequential client and a mostly cached prefix. It changes with utilization.</li>
+<li>The workload is three papers and 33 questions. Scores show the workload ran and make no quality claim.</li>
+<li>The pod 2 cost line is rate times hours, pending the final figure from the RunPod billing API. The droplet line awaits its invoice.</li>
+</ul>
+
+<h3>Open questions from the sources</h3>
+<ul>
+<li>The exact hashing construction LiteLLM uses to store virtual keys was not established from primary documentation. The key-storage guidance here is the standard pattern, not a claim about LiteLLM internals.</li>
+<li>The framework's pricing and tier facts (LiteLLM, identity providers, hosting) are October 2026 snapshots read through a web index, not in a live session. Auth0 changed its free-tier entitlements more than once in 2026.</li>
+<li>Whether a managed inference endpoint passes <code>cache_salt</code> through, exposes cache-hit metrics and allows an IP allowlist could not be checked for any specific vendor. On an endpoint that does none of these, cache isolation cannot be demonstrated, and it belongs on a vendor-selection checklist.</li>
+<li>The cross-domain delegation pattern is an IETF draft (revision 04, 2026-05-21), with implementations led by a few identity vendors. Not every tenant's provider offers it yet.</li>
+<li>NIST's agent-identity initiative dates rest on a research note that calls itself unofficial. NIST's own pages were not opened.</li>
+<li>The EU Digital Omnibus deferral dates rest on law-firm and standards-body write-ups, which agree with each other.</li>
+<li>Verizon reports its 2026 breach count only as "more than 22,000", with no exact figure.</li>
+<li>Menlo Ventures has no 2026 edition of either series as of 27 October 2026, so its figures are the 2025 editions.</li>
+</ul>
+</section>
+
+<!-- APPENDIX -->
+<section id="appendix">
+<h2>Appendix: claims checked and not cited</h2>
+<div class="note"><p><strong>Do not cite these.</strong> This appendix keeps the verification discipline visible. Each item either failed to trace to a primary source, was superseded by a 2026 edition, or was left out on purpose.</p></div>
+
+<h3>Not verified from a primary source</h3>
+<table class="rt">
+<thead><tr><th>Claim</th><th>Why it is not cited</th></tr></thead>
+<tbody>
+<tr><td data-label="Claim">"80 to 90% of AI spend is inference", attributed to FinOps in secondary blogs</td><td data-label="Why it is not cited">Not on the primary State of FinOps page.</td></tr>
+<tr><td data-label="Claim">A price coefficient of variation "as high as 1.7" attributed to Fradkin et al.</td><td data-label="Why it is not cited">Appears in secondary coverage and was not located in the sections of the paper that were read.</td></tr>
+<tr><td data-label="Claim">"Cost-of-Pass" (Erol et al., 2025), and a Stanford HAI figure of $20.00 to $0.07 per million tokens</td><td data-label="Why it is not cited">Only secondary citations were seen. The HAI figure was verified only as quoted by McKinsey.</td></tr>
+<tr><td data-label="Claim">Quantitative "SSO is table stakes" claims: 68% of enterprise RFPs requiring MFA or SSO, more than 80% of deals above $100k treating SSO and audit logging as gates, SSO as the most cited feature gating contracts above $50,000</td><td data-label="Why it is not cited">Vendor and secondary sources. None traced to a primary report. The qualitative claim is safe; the percentages are not.</td></tr>
+<tr><td data-label="Claim">A "$47,000 over 11 days" four-agent loop story</td><td data-label="Why it is not cited">Self-reported in an observability compilation that says so itself, and not independently verified.</td></tr>
+<tr><td data-label="Claim">An enterprise exhausting its entire 2026 AI budget by April 2026, and a "$500 million single month" AI bill</td><td data-label="Why it is not cited">Secondary reporting only, and the $500 million figure was described as unconfirmed.</td></tr>
+<tr><td data-label="Claim">ISO/IEC 42001 audit and logging clauses; SOC 2 audit-trail specifics</td><td data-label="Why it is not cited">The standard is paywalled and only secondary crosswalks and vendor checklists were found.</td></tr>
+<tr><td data-label="Claim">EU AI Act Article 26(6), deployer log retention of at least six months</td><td data-label="Why it is not cited">Secondary explainers only. Articles 12 and 19 are the verified provisions.</td></tr>
+<tr><td data-label="Claim">NIST AI Agent Standards Initiative dates</td><td data-label="Why it is not cited">No NIST primary page was opened. The dates rest on an unofficial research note and agreeing secondary reports.</td></tr>
+<tr><td data-label="Claim">The incident behind OpenAI's March 2023 cache bug</td><td data-label="Why it is not cited">OpenAI's original post was not opened. The incident reached the evidence bank only through a news account.</td></tr>
+<tr><td data-label="Claim">Secondary blogs that recycle the 2025 Verizon figures as "2026", and one that gives 2026 credential abuse as 26%</td><td data-label="Why it is not cited">The primary 2026 report (31% and 13%) controls.</td></tr>
+</tbody></table>
+
+<h3>Superseded by a 2026 edition</h3>
+<table class="rt">
+<thead><tr><th>2025 figure</th><th>What replaced it</th></tr></thead>
+<tbody>
+<tr><td data-label="2025 figure">FinOps: 63% manage AI spend</td><td data-label="What replaced it">98% in State of FinOps 2026.</td></tr>
+<tr><td data-label="2025 figure">Verizon DBIR 2025: credential abuse 22% and the leading initial access vector, across 12,195 confirmed breaches</td><td data-label="What replaced it">DBIR 2026: exploitation 31% leads, credential abuse 13%, and more than 22,000 confirmed breaches.</td></tr>
+<tr><td data-label="2025 figure">Microsoft 2025: more than 97% of identity attacks are password attacks, and identity attacks up 32%</td><td data-label="What replaced it">No equivalent in the 2026 report. Password attacks fell 26%, and password spray is over 99% of observed cloud initial-access efforts.</td></tr>
+<tr><td data-label="2025 figure">Microsoft 2025: phishing-resistant MFA can stop over 99% of password attacks</td><td data-label="What replaced it">Not restated in the 2026 sections that were read, so it is not used here.</td></tr>
+</tbody></table>
+
+<h3>Left out on purpose</h3>
+<p>Three items in the evidence bank name or grade specific providers: a per-provider analysis of API-key spend caps, a named key-theft incident at a coding-tool vendor, and a named provider's cache incident. This proposal grades no provider, so those items are not used. The evidence bank remains in <code>sources/</code> for anyone who wants them.</p>
+</section>
+
+</main>
+
+<footer><div class="wrap">
+<p><strong>Credits.</strong> QASPER is from the Allen Institute for AI, under a CC BY 4.0 license. The served model is Qwen2.5-Coder-7B-Instruct, under the Apache 2.0 license. The repository is <a href="https://github.com/hariparam81/argus-token-factory-gateway">hariparam81/argus-token-factory-gateway</a>, and its <code>RUN-REPORT.md</code> is the full run record.</p>
+<p>This page is a standalone file with no external fonts, scripts or images, so it also reads offline.</p>
+</div></footer>
+
+</body>
+</html>
