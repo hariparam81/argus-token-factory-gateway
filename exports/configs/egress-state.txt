@@ -1,0 +1,20 @@
+-N ARGUS-EGRESS
+-A ARGUS-EGRESS -m conntrack --ctstate RELATED,ESTABLISHED -j RETURN
+-A ARGUS-EGRESS -d 172.28.0.0/24 -j RETURN
+-A ARGUS-EGRESS -d 10.118.15.254/32 -p udp -m udp --dport 53 -j RETURN
+-A ARGUS-EGRESS -d 10.118.15.254/32 -p tcp -m tcp --dport 53 -j RETURN
+-A ARGUS-EGRESS -s 172.28.0.11/32 -d 203.57.40.93/32 -p tcp -m tcp --dport 10251 -j RETURN
+-A ARGUS-EGRESS -s 172.28.0.10/32 -p tcp -m tcp --dport 443 -m set --match-set allow_zitadel dst -j RETURN
+-A ARGUS-EGRESS -s 172.28.0.12/32 -p tcp -m tcp --dport 443 -m set --match-set allow_acme dst -j RETURN
+-A ARGUS-EGRESS -j REJECT --reject-with icmp-port-unreachable
+-N DOCKER-USER
+-A DOCKER-USER -s 172.28.0.0/24 -j ARGUS-EGRESS
+Name: allow_zitadel
+Members:
+34.36.163.181 timeout 2956
+Name: allow_acme
+Members:
+172.65.46.172 timeout 2956
+172.65.32.248 timeout 2956
+POD_IP=203.57.40.93
+POD_PORT=10251

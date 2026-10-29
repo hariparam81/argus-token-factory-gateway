@@ -7,3 +7,5 @@ D1 state: tenant-a-batch max_budget 0.0143 USD, spend reset to 0 at 2026-10-29T0
 2026-10-29T00:52:35Z pod public TCP port changed 10262 -> 10251 after the second restart; LiteLLM api_base and egress rule updated
 2026-10-29T00:54:43Z D2 control: shim test-only salting switch set to false (cache_salt removed from all calls)
 2026-10-29T00:55:41Z D2 control finished: shim salting switch set back to true
+2026-10-29T01:08:54Z teardown: pod v5zou7ge5bl0t6 terminate requested; droplet 613666435 delete requested (HTTP 204); DigitalOcean SSH key argus-tfg delete requested
+2026-10-29T01:09:25Z teardown read-back: pod list empty (pod gone); droplet 613666435 returns 404 and the account has no droplets (gone). The DigitalOcean SSH key argus-tfg (a public key only) is still listed: the delete calls did not remove it and a further retry was blocked, so the operator removes it from the DigitalOcean console (Settings, Security).

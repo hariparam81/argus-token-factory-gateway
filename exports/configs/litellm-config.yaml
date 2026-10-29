@@ -1,0 +1,16 @@
+# Pod backend at the Phase 0 derived price (pod $/hr over measured tokens/hr, blended input and output).
+# See PHASE0-FACTS.md. The pod address is the public TCP mapping; vLLM enforces --api-key.
+model_list:
+  - model_name: Qwen/Qwen2.5-Coder-7B-Instruct
+    litellm_params:
+      model: hosted_vllm/Qwen/Qwen2.5-Coder-7B-Instruct
+      api_base: http://203.57.40.93:10251/v1
+      api_key: os.environ/VLLM_API_KEY
+      input_cost_per_token: 1.9836e-07
+      output_cost_per_token: 1.9836e-07
+litellm_settings:
+  cache: false
+  telemetry: false
+general_settings:
+  master_key: os.environ/LITELLM_MASTER_KEY
+  database_url: os.environ/DATABASE_URL

@@ -1,0 +1,30 @@
+{
+ "tenants": {
+  "tenant-a": {
+   "salt": "<redacted>"
+  },
+  "tenant-b": {
+   "salt": "<redacted>",
+   "user_key": "<redacted>",
+   "agent_key": "<redacted>"
+  }
+ },
+ "factory_keys": {
+  "<sha256 redacted>": {
+   "tenant": "tenant-a",
+   "subject": "tenant-a-batch"
+  }
+ },
+ "issuers": {
+  "https://argus-tf-idp-3q58nr.us1.zitadel.cloud": {
+   "jwks_uri": "https://argus-tf-idp-3q58nr.us1.zitadel.cloud/oauth/v2/keys",
+   "audience": "397175819337762722",
+   "users": {
+    "397175765415756585": "tenant-b"
+   },
+   "agents": {
+    "397177372589197218": "tenant-b"
+   }
+  }
+ }
+}

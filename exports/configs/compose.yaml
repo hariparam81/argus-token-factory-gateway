@@ -1,0 +1,70 @@
+# Pinned versions: caddy 2.8.4, postgres 16.4, litellm v1.105.7, python 3.12.7-slim (shim base).
+# The external network "argus" (172.28.0.0/24) is created on the droplet before first start; static IPs
+# match the DOCKER-USER egress rules in egress/apply-egress.sh. Only caddy publishes host ports.
+services:
+  caddy:
+    image: caddy:2.8.4
+    restart: unless-stopped
+    ports: ["80:80", "443:443"]
+    environment:
+      PUBLIC_HOST: ${PUBLIC_HOST}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+    networks: { argus: { ipv4_address: 172.28.0.12 } }
+    depends_on: [shim]
+
+  shim:
+    build: ./shim
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://litellm:${POSTGRES_PASSWORD}@postgres:5432/litellm
+      LITELLM_URL: http://litellm:4000
+      REGISTRY_FILE: /etc/argus/registry.json
+      SALTING_ENABLED: ${SALTING_ENABLED:-true}
+      MAX_TOKENS_CAP: ${MAX_TOKENS_CAP:-512}
+      DELEGATION_SECRET: ${DELEGATION_SECRET}
+    volumes:
+      - ./registry.json:/etc/argus/registry.json:ro
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://127.0.0.1:8080/healthz')"]
+      interval: 10s
+      retries: 6
+    networks: { argus: { ipv4_address: 172.28.0.10 } }
+    depends_on: { litellm: { condition: service_healthy } }
+
+  litellm:
+    image: ghcr.io/berriai/litellm:v1.105.7
+    restart: unless-stopped
+    command: ["--config", "/app/config.yaml", "--port", "4000"]
+    environment:
+      LITELLM_MASTER_KEY: ${LITELLM_MASTER_KEY}
+      DATABASE_URL: postgresql://litellm:${POSTGRES_PASSWORD}@postgres:5432/litellm
+      VLLM_API_KEY: ${VLLM_API_KEY}
+      LITELLM_TELEMETRY: "False"
+    volumes:
+      - ./litellm-config.yaml:/app/config.yaml:ro
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://127.0.0.1:4000/health/liveliness')"]
+      interval: 15s
+      retries: 10
+      start_period: 60s
+    networks: { argus: { ipv4_address: 172.28.0.11 } }
+    depends_on: { postgres: { condition: service_healthy } }
+
+  postgres:
+    image: postgres:16.4
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: litellm
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: litellm
+    volumes: [pg_data:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U litellm"]
+      interval: 5s
+      retries: 10
+    networks: { argus: { ipv4_address: 172.28.0.13 } }
+
+volumes: { caddy_data: {}, pg_data: {} }
+networks: { argus: { external: true } }

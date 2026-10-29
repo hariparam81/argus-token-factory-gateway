@@ -1,0 +1,9 @@
+docker 29.1.3
+6.8.0-142-generic
+Ubuntu 24.04.5 LTS
+CONTAINER            REPOSITORY                TAG                 PLATFORM            IMAGE ID            SIZE                CREATED
+gateway-caddy-1      caddy                     2.8.4               linux/amd64         226d1f059b75        18.6MB              2 hours ago
+gateway-litellm-1    ghcr.io/berriai/litellm   v1.105.7            linux/amd64         64042b24fbb1        405MB               2 hours ago
+gateway-postgres-1   postgres                  16.4                linux/amd64         e62fbf9d3e2b        153MB               2 hours ago
+gateway-shim-1       gateway-shim              latest              linux/amd64         5634c302224f        64.7MB              54 minutes ago
+litellm 1.105.7
