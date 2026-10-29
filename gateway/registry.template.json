@@ -1,10 +1,17 @@
 {
   "tenants": {
     "tenant-a": {"salt": "REPLACE_WITH_RANDOM_SECRET"},
-    "tenant-b": {"salt": "REPLACE_WITH_RANDOM_SECRET"}
+    "tenant-b": {"salt": "REPLACE_WITH_RANDOM_SECRET", "user_key": "LITELLM_VIRTUAL_KEY_FOR_USER_CALLS", "agent_key": "LITELLM_VIRTUAL_KEY_FOR_AGENT_CALLS"}
   },
   "factory_keys": {
     "SHA256_OF_LITELLM_VIRTUAL_KEY": {"tenant": "tenant-a", "subject": "tenant-a-batch"}
   },
-  "issuers": {}
+  "issuers": {
+    "https://INSTANCE.zitadel.cloud": {
+      "jwks_uri": "https://INSTANCE.zitadel.cloud/oauth/v2/keys",
+      "audience": "PROJECT_ID",
+      "users": {"USER_SUB": "tenant-b"},
+      "agents": {"AGENT_SUB": "tenant-b"}
+    }
+  }
 }

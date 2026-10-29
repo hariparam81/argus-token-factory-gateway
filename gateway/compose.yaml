@@ -23,6 +23,7 @@ services:
       REGISTRY_FILE: /etc/argus/registry.json
       SALTING_ENABLED: ${SALTING_ENABLED:-true}
       MAX_TOKENS_CAP: ${MAX_TOKENS_CAP:-512}
+      DELEGATION_SECRET: ${DELEGATION_SECRET}
     volumes:
       - ./registry.json:/etc/argus/registry.json:ro
     healthcheck:
