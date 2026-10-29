@@ -1,0 +1,12 @@
+{"call": 1, "status": 422, "seconds": 0.377, "prompt_tokens": null, "cached_tokens": 0, "id": null}
+{"call": 2, "status": 422, "seconds": 0.443, "prompt_tokens": null, "cached_tokens": 0, "id": null}
+{"call": 3, "status": 422, "seconds": 1.009, "prompt_tokens": null, "cached_tokens": 0, "id": null}
+{"call": 4, "status": 422, "seconds": 0.459, "prompt_tokens": null, "cached_tokens": 0, "id": null}
+{"call": 5, "status": 422, "seconds": 0.488, "prompt_tokens": null, "cached_tokens": 0, "id": null}
+{"call": 6, "status": 422, "seconds": 0.458, "prompt_tokens": null, "cached_tokens": 0, "id": null}
+{"call": 7, "status": 422, "seconds": 0.427, "prompt_tokens": null, "cached_tokens": 0, "id": null}
+{"call": 8, "status": 422, "seconds": 0.487, "prompt_tokens": null, "cached_tokens": 0, "id": null}
+{"call": 9, "status": 422, "seconds": 0.365, "prompt_tokens": null, "cached_tokens": 0, "id": null}
+{"call": 10, "status": 422, "seconds": 0.456, "prompt_tokens": null, "cached_tokens": 0, "id": null}
+{"call": 11, "status": 422, "seconds": 0.363, "prompt_tokens": null, "cached_tokens": 0, "id": null}
+{"call": 12, "status": 422, "seconds": 0.5, "prompt_tokens": null, "cached_tokens": 0, "id": null}

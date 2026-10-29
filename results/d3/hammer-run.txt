@@ -1,0 +1,10 @@
+delegated token: sub = 397175765415756585 | act = {'sub': '397177372589197218'} | tenant = tenant-b | ttl s = 300
+agent call 1: 200
+agent call 2: 200
+agent call 3: 200
+agent call 4: 200
+agent call 5: 200
+agent call 6: 200
+agent call 7: 429
+rate limit hit on call 7
+plain user call during agent throttling: 200

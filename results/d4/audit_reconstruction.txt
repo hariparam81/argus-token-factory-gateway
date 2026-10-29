@@ -1,0 +1,36 @@
+  tenant  |  identity_mode  |      subject       |       actor        | calls | ok  | not_ok | prompt_tokens | completion_tokens | total_tokens | cost_usd 
+----------+-----------------+--------------------+--------------------+-------+-----+--------+---------------+-------------------+--------------+----------
+ tenant-a | factory_key     | tenant-a-batch     | -                  |   163 | 147 |     16 |        650525 |              1494 |       652019 | 0.129334
+ tenant-b | delegated_agent | 397175765415756585 | 397177372589197218 |    10 |   9 |      1 |         10203 |                86 |        10289 | 0.002041
+ tenant-b | delegation_mint | 397175765415756585 | 397177372589197218 |     2 |   2 |      0 |             0 |                 0 |            0 | 0.000000
+ tenant-b | federated_user  | 397175765415756585 | -                  |    84 |  84 |      0 |        376740 |               798 |       377538 | 0.074888
+(4 rows)
+
+ calls | cost_usd | total_tokens 
+-------+----------+--------------
+   259 | 0.206264 |      1039846
+(1 row)
+
+  tenant  |  identity_mode  | http_status | rejected |     reason     | count 
+----------+-----------------+-------------+----------+----------------+-------
+ tenant-a | factory_key     |         422 | f        | (from LiteLLM) |    16
+ tenant-b | delegated_agent |         429 | f        | (from LiteLLM) |     1
+(2 rows)
+
+       at       |        reason         | http_status 
+----------------+-----------------------+-------------
+ 10-29 00:18:20 | unauthenticated       |         401
+ 10-29 00:18:21 | unregistered_issuer   |         401
+ 10-29 00:18:22 | invalid_token         |         401
+ 10-29 00:18:22 | algorithm_not_allowed |         401
+ 10-29 00:18:22 | unauthenticated       |         401
+ 10-29 00:18:23 | token_expired         |         401
+ 10-29 00:18:53 | unauthenticated       |         401
+ 10-29 00:18:53 | unregistered_issuer   |         401
+ 10-29 00:18:54 | invalid_token         |         401
+ 10-29 00:18:54 | algorithm_not_allowed |         401
+ 10-29 00:18:54 | unauthenticated       |         401
+ 10-29 00:18:55 | token_expired         |         401
+ 10-29 00:18:56 | wrong_audience        |         401
+(13 rows)
+

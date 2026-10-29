@@ -1,0 +1,12 @@
+{"call": 1, "status": 200, "seconds": 1.576, "prompt_tokens": 4481, "cached_tokens": 0, "id": "chatcmpl-c5efc1f189904c0f949c51ee93bca27a"}
+{"call": 2, "status": 200, "seconds": 0.884, "prompt_tokens": 4483, "cached_tokens": 4464, "id": "chatcmpl-7e9249e47275458f8cf33abadf731be2"}
+{"call": 3, "status": 200, "seconds": 0.739, "prompt_tokens": 4489, "cached_tokens": 4464, "id": "chatcmpl-b73919d5fdca4ce0a63924428d83fba4"}
+{"call": 4, "status": 200, "seconds": 0.867, "prompt_tokens": 4480, "cached_tokens": 4464, "id": "chatcmpl-d738c2b325a74728a28c2e871c644ab4"}
+{"call": 5, "status": 200, "seconds": 1.269, "prompt_tokens": 4483, "cached_tokens": 4464, "id": "chatcmpl-43eb7b4a71564e40b57e8e0ffd9a1812"}
+{"call": 6, "status": 200, "seconds": 1.219, "prompt_tokens": 4483, "cached_tokens": 4464, "id": "chatcmpl-8dc53a5f01fa4576a2376b07af07e720"}
+{"call": 7, "status": 200, "seconds": 1.228, "prompt_tokens": 4483, "cached_tokens": 4464, "id": "chatcmpl-bc29a47d560441519489c897b5911d88"}
+{"call": 8, "status": 200, "seconds": 0.707, "prompt_tokens": 4486, "cached_tokens": 4464, "id": "chatcmpl-3e493f52e6604b0d9fde436c685fc58b"}
+{"call": 9, "status": 200, "seconds": 1.341, "prompt_tokens": 4486, "cached_tokens": 4464, "id": "chatcmpl-47b67d89dd704ee9b5376893fdff7049"}
+{"call": 10, "status": 200, "seconds": 0.922, "prompt_tokens": 4486, "cached_tokens": 4464, "id": "chatcmpl-06029bc1632d4d108178aefe4809afea"}
+{"call": 11, "status": 200, "seconds": 0.723, "prompt_tokens": 4493, "cached_tokens": 4464, "id": "chatcmpl-814964ad738049049f89023b068ccfdd"}
+{"call": 12, "status": 200, "seconds": 1.294, "prompt_tokens": 4487, "cached_tokens": 4464, "id": "chatcmpl-04855ebb09d44c809f19793bb13fa6c9"}

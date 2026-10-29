@@ -1,0 +1,3 @@
+results/d1/tenant_a_d1.jsonl: 18/19 answered | text-answer set n=15 mean token F1=0.391 | yes/no n=2 correct=2 | unanswerable-gold n=1 model-said-unanswerable=1 | prompt tokens=71971 cached=68704 (95.5%) | cost=0.014329 USD
+results/qasper/a_full.jsonl: 33/33 answered | text-answer set n=29 mean token F1=0.456 | yes/no n=3 correct=3 | unanswerable-gold n=1 model-said-unanswerable=1 | prompt tokens=120391 cached=109088 (90.6%) | cost=0.023986 USD
+results/qasper/b_full.jsonl: 33/33 answered | text-answer set n=29 mean token F1=0.457 | yes/no n=3 correct=3 | unanswerable-gold n=1 model-said-unanswerable=1 | prompt tokens=120391 cached=112416 (93.4%) | cost=0.023986 USD

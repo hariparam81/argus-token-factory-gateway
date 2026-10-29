@@ -31,15 +31,21 @@ def ask(url, key, paper_text, question):
         return e.code, json.loads(e.read() or b"{}"), e.headers, time.perf_counter() - t0
 
 
-def main():
+def main(default_identity="factory"):
     ap = argparse.ArgumentParser()
+    ap.add_argument("--identity", choices=["factory", "user"], default=default_identity)
     ap.add_argument("--out", required=True)
     ap.add_argument("--papers", nargs="*")
     ap.add_argument("--max-questions", type=int)
     ap.add_argument("--workload", default=str(Path(__file__).parent.parent / "workload" / "workload.json"))
     a = ap.parse_args()
     url = os.environ["GATEWAY_URL"].rstrip("/") + "/v1/chat/completions"
-    key = os.environ["TENANT_A_KEY"]
+    if a.identity == "user":  # Tenant B: the user's ZITADEL JWT, renewed from the stored refresh token
+        sys.path.insert(0, str(Path(__file__).parent / "agent"))
+        import idp
+        key = idp.user_token()
+    else:
+        key = os.environ["TENANT_A_KEY"]
     work = json.load(open(a.workload))
     Path(a.out).parent.mkdir(parents=True, exist_ok=True)
     done = 0

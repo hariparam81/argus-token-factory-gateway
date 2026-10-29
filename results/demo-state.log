@@ -1,0 +1,9 @@
+2026-10-29T00:23:43Z D1 reset: Tenant A key tenant-a-batch max_budget 0.0143 -> 0.05, spend 0.0143285346 -> 0 (before D2)
+D1 state: tenant-a-batch max_budget 0.0143 USD, spend reset to 0 at 2026-10-29T00:22Z, batch of 33 questions run sequentially from the operator's Mac.
+2026-10-29T00:23:52Z D2 main sequence: vLLM container restarted via RunPod pod restart to declare a cold prefix cache (pod v5zou7ge5bl0t6; public TCP mapping unchanged 203.57.40.93:10192)
+2026-10-29T00:40:26Z pod public TCP port changed 10192 -> 10262 after restart; LiteLLM api_base and egress rule updated (gateway/ops/set-pod-port.sh)
+2026-10-29T00:43:12Z D2 setup failure: Tenant A key hit its 0.05 USD cap during repeat pass 4 (call 4 got 422 budget_exceeded; each 12-call pass costs about 0.0107 USD). Raised max_budget to 1.00 and reset spend to 0; reran all five Tenant A repeat passes. Earlier repeat files kept in results/d2/superseded/.
+2026-10-29T00:44:30Z D2 control sequence: vLLM container restarted again via RunPod pod restart to declare a cold prefix cache
+2026-10-29T00:52:35Z pod public TCP port changed 10262 -> 10251 after the second restart; LiteLLM api_base and egress rule updated
+2026-10-29T00:54:43Z D2 control: shim test-only salting switch set to false (cache_salt removed from all calls)
+2026-10-29T00:55:41Z D2 control finished: shim salting switch set back to true

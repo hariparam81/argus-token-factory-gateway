@@ -1,0 +1,28 @@
+-- team and key spend after
+ team_alias |    spend     | max_budget 
+------------+--------------+------------
+ tenant-b   | 0.0789631488 |        0.2
+(1 row)
+
+   key_alias    |     spend     
+----------------+---------------
+ tenant-b-agent | 0.00404694072
+ tenant-b-user  | 0.07491620808
+(2 rows)
+
+-- completed calls in the D3 window (spend log rows by key)
+   key_alias    | calls | spend_sum  
+----------------+-------+------------
+ tenant-b-agent |    10 | 0.00204093
+ tenant-b-user  |     1 | 0.00000694
+(2 rows)
+
+-- audit rows in the D3 window by mode and status
+  identity_mode  | http_status | count 
+-----------------+-------------+-------
+ delegated_agent |         200 |     9
+ delegated_agent |         429 |     1
+ delegation_mint |         200 |     2
+ federated_user  |         200 |     1
+(4 rows)
+

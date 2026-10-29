@@ -4,7 +4,7 @@ model_list:
   - model_name: Qwen/Qwen2.5-Coder-7B-Instruct
     litellm_params:
       model: hosted_vllm/Qwen/Qwen2.5-Coder-7B-Instruct
-      api_base: http://203.57.40.93:10192/v1
+      api_base: http://203.57.40.93:10251/v1
       api_key: os.environ/VLLM_API_KEY
       input_cost_per_token: 1.9836e-07
       output_cost_per_token: 1.9836e-07
