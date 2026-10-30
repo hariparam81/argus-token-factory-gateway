@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Token Factory Companion: framework, evidence and proof of concept</title>
-<meta name="description" content="Detailed companion to the token factory article: the framework, the evidence behind five commitments, and the full record of a one-time proof of concept.">
+<meta name="description" content="Detailed companion to the token factory article: the framework, the evidence behind five tenets, and the full record of a one-time proof of concept.">
 <style>
 :root{--ink:#1F2933;--muted:#5B6470;--line:#D5D9E0;--soft:#F4F5F7;--blue:#2F6FED;--blue-ink:#1D4FBF;--blue-soft:#E8F0FE;--white:#fff}
 *{box-sizing:border-box}
@@ -91,8 +91,8 @@ footer{padding:36px 0 56px;color:var(--muted);font-size:15px;border-top:1px soli
 <header class="top"><div class="wrap">
 <p class="kicker">Companion to the article</p>
 <h1>Token Factory: the framework, the evidence and the proof of concept</h1>
-<p class="lede">A token factory sells inference as a metered service. This page holds the detail behind a proposal for building one: the design in full, the evidence for five commitments, and the complete record of a small instance that I ran once and then shut down.</p>
-<div class="status"><p><strong>Status.</strong> The proof of concept was a completed run on 28 and 29 October 2026 (UTC). The infrastructure was destroyed at the end of the run, and no endpoint is live. The repository holds the configs, the run report and the raw exports, and those files are the evidence that remains.</p></div>
+<p class="lede">A token factory sells inference as a metered service. This page holds the detail behind a proposal for building one: the design in full, the evidence for five tenets, and the complete record of a small instance that I ran once and then shut down.</p>
+<div class="status"><p><strong>Status.</strong> I stood up a proof of concept to replicate the framework as closely as a small instance allows, then ran a real workload through it to test and validate the design. No endpoint is live. The repository holds the configs, the run report and the raw exports, which are the evidence.</p></div>
 </div></header>
 
 <nav class="toc" aria-label="Sections"><div class="wrap"><ul>
@@ -103,7 +103,6 @@ footer{padding:36px 0 56px;color:var(--muted);font-size:15px;border-top:1px soli
 <li><a href="#delegated">5 Delegated call</a></li>
 <li><a href="#reproduce">6 Reproduce</a></li>
 <li><a href="#limits">7 Limits</a></li>
-<li><a href="#appendix">Appendix</a></li>
 </ul></div></nav>
 
 <main class="wrap">
@@ -111,13 +110,13 @@ footer{padding:36px 0 56px;color:var(--muted);font-size:15px;border-top:1px soli
 <!-- 1 OVERVIEW -->
 <section id="overview">
 <h2><span class="n">1</span>Overview</h2>
-<p>The proposal is written from the provider's side of the counter. Customers send prompts, the factory runs them on shared GPUs, and customers get completions and a bill. Five commitments describe the terms on which the factory sells.</p>
+<p>The proposal is written from the provider's side of the counter. Customers send prompts, the factory runs them on shared GPUs, and customers get completions and a bill. Five tenets describe the terms on which the factory sells.</p>
 
 <div class="grid">
 <div class="card"><h4>Lowest cost</h4><p>Choose the model and the hardware by cost per outcome, and meter at a price that reflects what the hardware costs.</p></div>
-<div class="card"><h4>Federate with the customer's identity provider</h4><p>Customers sign in with the identity they already run.</p></div>
+<div class="card"><h4>Federate with the customer's identity provider</h4><p>Customers sign in with the identity they already run. Where a customer cannot federate, the factory issues scoped credentials and gives the tenant an admin path to revoke them.</p></div>
 <div class="card"><h4>Isolate each tenant's data and cache</h4><p>One tenant's prompts must leave no trace another tenant can measure.</p></div>
-<div class="card"><h4>Cap each tenant's spend</h4><p>The cap refuses the next call once the budget is gone.</p></div>
+<div class="card"><h4>Meter and manage spend</h4><p>Every call is metered to the tenant, the user and the agent behind it, and a cap refuses the next call once the budget is gone.</p></div>
 <div class="card"><h4>Audit every call</h4><p>Every request leaves a row that says who made it and on whose behalf.</p></div>
 </div>
 
@@ -135,7 +134,7 @@ footer{padding:36px 0 56px;color:var(--muted);font-size:15px;border-top:1px soli
 <div class="card soft"><p class="stat">about $2.49</p><p class="stat-label">total cost of the run, including idle time</p></div>
 </div>
 
-<p>Section 2 gives the framework. Section 3 holds the evidence for each commitment, with dates, links and caveats. Section 4 is the full record of the run, section 5 follows one delegated call from sign-in to audit row, section 6 says how to reproduce it, and section 7 lists the limits and open questions. The appendix shows the claims I checked and chose not to cite.</p>
+<p>Section 2 gives the framework. Section 3 holds the evidence for each tenet, with dates, links and caveats. Section 4 is the full record of the run, section 5 follows one delegated call from sign-in to audit row, section 6 says how to reproduce it, and section 7 lists the limits and open questions.</p>
 </section>
 
 <!-- 2 FRAMEWORK -->
@@ -249,7 +248,7 @@ footer{padding:36px 0 56px;color:var(--muted);font-size:15px;border-top:1px soli
 <tbody><tr>
 <td>The auth shim with principal resolution for the paths, the tenant registry, salt injection, payload caps, the audit table and the demos</td>
 <td>LiteLLM open-source tier, a free-tier identity provider, Caddy for TLS, Docker Compose, Postgres</td>
-<td>Billing and invoicing (budgets are caps, not billing), service-level objectives, multi-region operation, dedicated per-tenant endpoints, SCIM provisioning, a self-service tenant portal, guardrail and PII tooling</td>
+<td>Billing and invoicing (budgets are caps, not billing), service-level objectives, multi-region operation, dedicated per-tenant endpoints, SCIM provisioning, a self-service tenant portal, guardrail and PII tooling, automatic model selection and failover (described in the design, not tested in the run)</td>
 </tr></tbody></table>
 
 <h3 id="checklist">2.8 Reviewer security checklist</h3>
@@ -273,7 +272,7 @@ footer{padding:36px 0 56px;color:var(--muted);font-size:15px;border-top:1px soli
 <!-- 3 EVIDENCE -->
 <section id="evidence">
 <h2><span class="n">3</span>The evidence bank</h2>
-<p>Each commitment has a short synthesis of why it matters, followed by the sources as cards with dates, links and caveats. Sources were opened and read on 27 October 2026 unless a card says otherwise. Where a 2026 edition of a recurring report exists, the 2026 figures replace the 2025 ones, and the appendix lists the superseded figures. Tags mark the source type: <span class="tag flag">Caveat</span> for a limit on how to read it, <span class="tag vendor">Vendor</span> for a vendor survey with original data.</p>
+<p>Each tenet has a short synthesis of why it matters, followed by the sources as cards with dates, links and caveats. Sources were opened and read on 27 October 2026 unless a card says otherwise. Where a 2026 edition of a recurring report exists, and the 2026 figures replace the 2025 ones. Tags mark the source type: <span class="tag flag">Caveat</span> for a limit on how to read it, <span class="tag vendor">Vendor</span> for a vendor survey with original data.</p>
 
 <h3 id="ev-isolate">3.1 Isolate each tenant's data and cache</h3>
 <p><strong>Why it matters.</strong> The prefix cache that makes shared inference fast also gives callers a timing side channel. An adversarial tenant can try to reconstruct another tenant's prompt from cache-hit latency, and published attacks report success rates from 89% up to 100% against unprotected servers. The attack needs only ordinary API access. The channel has a tracked CVE in vLLM. AWS's SaaS guidance states the architectural rule that isolation is a separate mechanism from authentication.</p>
@@ -317,6 +316,7 @@ footer{padding:36px 0 56px;color:var(--muted);font-size:15px;border-top:1px soli
 
 <h3 id="ev-federate">3.3 Federate with the customer's identity provider</h3>
 <p><strong>Why it matters.</strong> Attackers sign in. Valid-account abuse sits behind a large share of cloud incidents, password spraying dominates cloud initial access, and the 2026 reports describe attackers pivoting as MFA and passkeys spread. A service that federates inherits the customer's own sign-in controls, lifecycle and revocation, instead of adding its own passwords to the blast radius. Standards point the same way.</p>
+<p>Some customers cannot federate. Where a customer cannot, the factory issues scoped credentials of its own and gives the tenant an admin path to revoke them. The proof of concept ran long-lived factory keys for Tenant A; short-lived credentials are a design claim and were not tested.</p>
 <div class="grid">
 <div class="card"><h4>Legitimate access becomes the threat</h4>
 <p>Password spray accounts for over 99% of observed cloud initial-access efforts, in 124,146,529 password-spray attacks seen in Defender XDR data from December 2025 to June 2026. Overall password attacks fell 26% year on year, which the report attributes to MFA and passkeys forcing a pivot. The share of adversary-in-the-middle phishing and token theft more than doubled in the first six months of 2026. Of intrusions that began with valid accounts, 52.2% involved follow-on credential theft and 18.4% involved active password spray.</p>
@@ -341,7 +341,7 @@ footer{padding:36px 0 56px;color:var(--muted);font-size:15px;border-top:1px soli
 <p class="cav"><span class="tag flag">Caveat</span>Secondary source. The note labels itself unofficial and AI-assisted, and NIST's own pages were not opened.</p></div>
 </div>
 
-<h3 id="ev-cap">3.4 Cap each tenant's spend</h3>
+<h3 id="ev-cap">3.4 Meter and manage spend</h3>
 <p><strong>Why it matters.</strong> Consumption-priced inference fails open. One runaway agent loop produced a roughly $50,000 bill in under an hour, 93% of organisations in a McKinsey survey report exceeding AI budgets, and surveys show policy without real-time visibility. A cap enforced where spend is recorded refuses the next call, and a policy document does not.</p>
 <div class="grid">
 <div class="card"><h4>One loop, about $50,000 in under an hour</h4>
@@ -359,6 +359,7 @@ footer{padding:36px 0 56px;color:var(--muted);font-size:15px;border-top:1px soli
 
 <h3 id="ev-cost">3.5 Lowest cost</h3>
 <p><strong>Why it matters.</strong> Inference has become the budget. It is the majority workload for most startups and about half of enterprises, enterprise AI spend more than tripled in a year, and 98% of FinOps respondents now manage AI spend. Cost is driven by task structure as well as token price. A factory's cost position is a first-order competitive fact.</p>
+<p>The gateway can apply cost-per-outcome selection on every call. With automatic routing on, it classifies each request and sends it to the cheapest model that meets the tenant's quality setting, with the measured per-use-case picks as the default policy. If the chosen endpoint fails, the route falls back to a model the tenant designated in advance. The proof of concept routed by task, tenant policy and the principal's allowlist and did not test routing or failover.</p>
 <div class="grid">
 <div class="card"><h4>Inference is the majority workload</h4>
 <p>74% of startups (up from 48%) and 49% of enterprises (up from 29%) say inference accounts for most of their compute. Enterprise LLM spend went from $3.5B in November 2024 to $8.4B in mid-2025.</p>
@@ -387,7 +388,7 @@ footer{padding:36px 0 56px;color:var(--muted);font-size:15px;border-top:1px soli
 <!-- 4 POC -->
 <section id="poc">
 <h2><span class="n">4</span>The proof of concept in full</h2>
-<p>Run on 28 and 29 October 2026 (UTC). The infrastructure was destroyed at teardown, so the exports and results in the repository are the only evidence that exists. Everything below comes from the run report and those files.</p>
+<p>I stood up a proof of concept to replicate the framework as closely as a small instance allows, then ran a real workload through it to test and validate the design. Everything below comes from the run report and the exports and results files in the repository.</p>
 
 <h3 id="architecture-built">4.1 Architecture as built</h3>
 <table class="rt">
@@ -401,7 +402,7 @@ footer{padding:36px 0 56px;color:var(--muted);font-size:15px;border-top:1px soli
 <tr><td>Database</td><td>Postgres 16.4</td><td>LiteLLM tables plus the shim's audit table</td></tr>
 <tr><td>Egress control</td><td>Default-deny rules on the droplet</td><td>Limited what each container could reach</td></tr>
 <tr><td>Identity provider</td><td>ZITADEL Cloud, free tier</td><td>Issued Tenant B's user and agent tokens</td></tr>
-<tr><td>Agent</td><td>A script on the operator's laptop</td><td>Acted for Tenant B's user through the public front door</td></tr>
+<tr><td>Agent</td><td>A script on the laptop</td><td>Acted for Tenant B's user through the public gateway</td></tr>
 </tbody></table>
 <p>The public name was a free DNS subdomain, in place of a domain of my own. Caddy obtained a Let's Encrypt certificate through the ACME egress allowance on first start. Only Caddy published host ports (80 and 443), and LiteLLM published none. Containers had static addresses on one internal network, so the egress rules could match them by source address. Spend logs stored no prompt or response bodies.</p>
 
@@ -501,7 +502,7 @@ footer{padding:36px 0 56px;color:var(--muted);font-size:15px;border-top:1px soli
 <p>Raw per-call files are under <code>results/</code>, and demo state changes are in <code>results/demo-state.log</code>.</p>
 
 <h4 id="d1">D1: the budget cap fires mid-work</h4>
-<p>Tenant A's key was given a budget of $0.0143, sized from per-call cost so that the stop would land between 40% and 70% of the 33-question batch (the whole workload costs about $0.024). The batch ran one call at a time from the operator's laptop through the public URL, and stopped at the first non-200 response.</p>
+<p>Tenant A's key was given a budget of $0.0143, sized from per-call cost so that the stop would land between 40% and 70% of the 33-question batch (the whole workload costs about $0.024). The batch ran one call at a time from the laptop through the public URL, and stopped at the first non-200 response.</p>
 <ul>
 <li>18 questions were answered (54.5%). Question 19 returned HTTP 422 <code>budget_exceeded</code>.</li>
 <li>Per-call cost headers sum to $0.014329. The key's recorded spend is $0.0143285346. The spend log has 19 rows summing to $0.014329: 18 completed calls plus the refused call at zero spend.</li>
@@ -524,7 +525,7 @@ footer{padding:36px 0 56px;color:var(--muted);font-size:15px;border-top:1px soli
 <tr><td>Control</td><td>Tenant B first pass</td><td class="num"><strong>4,480 of 4,481</strong></td><td class="num">99.9%</td></tr>
 </tbody></table>
 <p>The comparison that carries the claim: Tenant B's first call reads 0 cached tokens when salting is on and 4,480 of 4,481 when salting is off.</p>
-<p><strong>Timings, secondary.</strong> First calls took 5.39 s (A, cold, the first request after a restart), 1.576 s (B, salted, with the other tenant warm), 5.762 s (control A, cold) and 1.227 s (control B, unsalted, warm). Across the five repeat passes, the median of the per-pass median call latencies was 0.969 s for Tenant B and 1.028 s for Tenant A. Every call includes the round trip from the operator's laptop through Caddy, the shim and LiteLLM, about one second end to end, so the prefill difference is hard to see in wall time at this prefix size. First passes are single measurements.</p>
+<p><strong>Timings, secondary.</strong> First calls took 5.39 s (A, cold, the first request after a restart), 1.576 s (B, salted, with the other tenant warm), 5.762 s (control A, cold) and 1.227 s (control B, unsalted, warm). Across the five repeat passes, the median of the per-pass median call latencies was 0.969 s for Tenant B and 1.028 s for Tenant A. Every call includes the round trip from the laptop through Caddy, the shim and LiteLLM, about one second end to end, so the prefill difference is hard to see in wall time at this prefix size. First passes are single measurements.</p>
 <p><strong>A setup failure, excluded from the results.</strong> Tenant A's key hit its $0.05 cap during the first set of repeat passes, because a 12-call pass costs about $0.0107 (cached tokens are priced at the same blended rate). Repeat 4 had refusals and repeat 5 was refused entirely. The budget was raised to $1.00 and all five of A's repeat passes were rerun, with the earlier files kept in <code>results/d2/superseded/</code>. The 15 resulting 422 responses appear in the D4 output as Tenant A's non-OK calls.</p>
 <details><summary>Full per-pass table from results/d2/summary.md</summary>
 <table class="rt">
@@ -787,49 +788,9 @@ results/qasper/b_full.jsonl: 33/33 answered | text-answer set n=29 mean token F1
 <li>The exact hashing construction LiteLLM uses to store virtual keys was not established from primary documentation. The key-storage guidance here is the standard pattern, not a claim about LiteLLM internals.</li>
 <li>The framework's pricing and tier facts (LiteLLM, identity providers, hosting) are October 2026 snapshots read through a web index, not in a live session. Auth0 changed its free-tier entitlements more than once in 2026.</li>
 <li>Whether a managed inference endpoint passes <code>cache_salt</code> through, exposes cache-hit metrics and allows an IP allowlist could not be checked for any specific vendor. On an endpoint that does none of these, cache isolation cannot be demonstrated, and it belongs on a vendor-selection checklist.</li>
-<li>The cross-domain delegation pattern is an IETF draft (revision 04, 2026-05-21), with implementations led by a few identity vendors. Not every tenant's provider offers it yet.</li>
-<li>NIST's agent-identity initiative dates rest on a research note that calls itself unofficial. NIST's own pages were not opened.</li>
-<li>The EU Digital Omnibus deferral dates rest on law-firm and standards-body write-ups, which agree with each other.</li>
-<li>Verizon reports its 2026 breach count only as "more than 22,000", with no exact figure.</li>
-<li>Menlo Ventures has no 2026 edition of either series as of 27 October 2026, so its figures are the 2025 editions.</li>
 </ul>
 </section>
 
-<!-- APPENDIX -->
-<section id="appendix">
-<h2>Appendix: claims checked and not cited</h2>
-<div class="note"><p><strong>Do not cite these.</strong> This appendix keeps the verification discipline visible. Each item either failed to trace to a primary source, was superseded by a 2026 edition, or was left out on purpose.</p></div>
-
-<h3>Not verified from a primary source</h3>
-<table class="rt">
-<thead><tr><th>Claim</th><th>Why it is not cited</th></tr></thead>
-<tbody>
-<tr><td>"80 to 90% of AI spend is inference", attributed to FinOps in secondary blogs</td><td>Not on the primary State of FinOps page.</td></tr>
-<tr><td>A price coefficient of variation "as high as 1.7" attributed to Fradkin et al.</td><td>Appears in secondary coverage and was not located in the sections of the paper that were read.</td></tr>
-<tr><td>"Cost-of-Pass" (Erol et al., 2025), and a Stanford HAI figure of $20.00 to $0.07 per million tokens</td><td>Only secondary citations were seen. The HAI figure was verified only as quoted by McKinsey.</td></tr>
-<tr><td>Quantitative "SSO is table stakes" claims: 68% of enterprise RFPs requiring MFA or SSO, more than 80% of deals above $100k treating SSO and audit logging as gates, SSO as the most cited feature gating contracts above $50,000</td><td>Vendor and secondary sources. None traced to a primary report. The qualitative claim is safe; the percentages are not.</td></tr>
-<tr><td>A "$47,000 over 11 days" four-agent loop story</td><td>Self-reported in an observability compilation that says so itself, and not independently verified.</td></tr>
-<tr><td>An enterprise exhausting its entire 2026 AI budget by April 2026, and a "$500 million single month" AI bill</td><td>Secondary reporting only, and the $500 million figure was described as unconfirmed.</td></tr>
-<tr><td>ISO/IEC 42001 audit and logging clauses; SOC 2 audit-trail specifics</td><td>The standard is paywalled and only secondary crosswalks and vendor checklists were found.</td></tr>
-<tr><td>EU AI Act Article 26(6), deployer log retention of at least six months</td><td>Secondary explainers only. Articles 12 and 19 are the verified provisions.</td></tr>
-<tr><td>NIST AI Agent Standards Initiative dates</td><td>No NIST primary page was opened. The dates rest on an unofficial research note and agreeing secondary reports.</td></tr>
-<tr><td>The incident behind OpenAI's March 2023 cache bug</td><td>OpenAI's original post was not opened. The incident reached the evidence bank only through a news account.</td></tr>
-<tr><td>Secondary blogs that recycle the 2025 Verizon figures as "2026", and one that gives 2026 credential abuse as 26%</td><td>The primary 2026 report (31% and 13%) controls.</td></tr>
-</tbody></table>
-
-<h3>Superseded by a 2026 edition</h3>
-<table class="rt">
-<thead><tr><th>2025 figure</th><th>What replaced it</th></tr></thead>
-<tbody>
-<tr><td>FinOps: 63% manage AI spend</td><td>98% in State of FinOps 2026.</td></tr>
-<tr><td>Verizon DBIR 2025: credential abuse 22% and the leading initial access vector, across 12,195 confirmed breaches</td><td>DBIR 2026: exploitation 31% leads, credential abuse 13%, and more than 22,000 confirmed breaches.</td></tr>
-<tr><td>Microsoft 2025: more than 97% of identity attacks are password attacks, and identity attacks up 32%</td><td>No equivalent in the 2026 report. Password attacks fell 26%, and password spray is over 99% of observed cloud initial-access efforts.</td></tr>
-<tr><td>Microsoft 2025: phishing-resistant MFA can stop over 99% of password attacks</td><td>Not restated in the 2026 sections that were read, so it is not used here.</td></tr>
-</tbody></table>
-
-<h3>Left out on purpose</h3>
-<p>Three items in the evidence bank name or grade specific providers: a per-provider analysis of API-key spend caps, a named key-theft incident at a coding-tool vendor, and a named provider's cache incident. This proposal grades no provider, so those items are not used. The evidence bank remains in <code>sources/</code> for anyone who wants them.</p>
-</section>
 
 </main>
 
