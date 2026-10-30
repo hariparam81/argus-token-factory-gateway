@@ -24,7 +24,7 @@ The proof of concept was a completed run on 28 and 29 October 2026 (UTC), and it
 |---|---|
 | `RUN-REPORT.md` | The full record of the run: facts, demo outputs, cost ledger, pitfalls, scope |
 | `docs/` | The standalone companion page (`index.html`), served by GitHub Pages |
-| `post/` | The article (`post.md`), its three diagrams in `assets/`, the stage reports, and `html-src/` (source and build script for the companion page) |
+| `post/html-src/` | Source, diagram SVGs and build script for the companion page (`python3 post/html-src/build.py`) |
 | `gateway/` | As-run configuration: Docker Compose stack, Caddyfile, LiteLLM config, the auth shim (`shim/app.py`), egress rules, templates for secrets, fact records |
 | `clients/` | Tenant runners, the exit-gate and negative tests, the cache demo scripts, scoring, and the agent |
 | `workload/` | QASPER workload preparation, the selected questions and the preflight probe |

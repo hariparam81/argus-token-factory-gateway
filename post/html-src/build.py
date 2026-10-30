@@ -7,7 +7,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / "post/html-src/index.src.html"
 OUT = ROOT / "docs/index.html"
-ASSETS = ROOT / "post/assets"
+ASSETS = ROOT / "post/html-src/assets"
 
 LABELS = {
     "DIAGRAM1": ("diagram-1-system.svg", "d1", "Diagram 1: the system. Consumers and four identity paths on the left, the gateway in the centre, the model catalog on the right, and the audit bar underneath."),
