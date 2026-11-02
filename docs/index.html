@@ -402,7 +402,7 @@ footer{padding:36px 0 56px;color:var(--muted);font-size:15px;border-top:1px soli
 <tr><td data-label="Component">Database</td><td data-label="What it was">Postgres 16.4</td><td data-label="What it did">LiteLLM tables plus the shim's audit table</td></tr>
 <tr><td data-label="Component">Egress control</td><td data-label="What it was">Default-deny rules on the droplet</td><td data-label="What it did">Limited what each container could reach</td></tr>
 <tr><td data-label="Component">Identity provider</td><td data-label="What it was">ZITADEL Cloud, free tier</td><td data-label="What it did">Issued Tenant B's user and agent tokens</td></tr>
-<tr><td data-label="Component">Agent</td><td data-label="What it was">A script on the laptop</td><td data-label="What it did">Acted for Tenant B's user through the public gateway</td></tr>
+<tr><td data-label="Component">Agent</td><td data-label="What it was">A script on the client interface</td><td data-label="What it did">Acted for Tenant B's user through the public gateway</td></tr>
 </tbody></table>
 <p>The public name was a free DNS subdomain, in place of a domain of my own. Caddy obtained a Let's Encrypt certificate through the ACME egress allowance on first start. Only Caddy published host ports (80 and 443), and LiteLLM published none. Containers had static addresses on one internal network, so the egress rules could match them by source address. Spend logs stored no prompt or response bodies.</p>
 
@@ -502,7 +502,7 @@ footer{padding:36px 0 56px;color:var(--muted);font-size:15px;border-top:1px soli
 <p>Raw per-call files are under <code>results/</code>, and demo state changes are in <code>results/demo-state.log</code>.</p>
 
 <h4 id="d1">D1: the budget cap fires mid-work</h4>
-<p>Tenant A's key was given a budget of $0.0143, sized from per-call cost so that the stop would land between 40% and 70% of the 33-question batch (the whole workload costs about $0.024). The batch ran one call at a time from the laptop through the public URL, and stopped at the first non-200 response.</p>
+<p>Tenant A's key was given a budget of $0.0143, sized from per-call cost so that the stop would land between 40% and 70% of the 33-question batch (the whole workload costs about $0.024). The batch ran one call at a time from the client interface through the public URL, and stopped at the first non-200 response.</p>
 <ul>
 <li>18 questions were answered (54.5%). Question 19 returned HTTP 422 <code>budget_exceeded</code>.</li>
 <li>Per-call cost headers sum to $0.014329. The key's recorded spend is $0.0143285346. The spend log has 19 rows summing to $0.014329: 18 completed calls plus the refused call at zero spend.</li>
@@ -525,7 +525,7 @@ footer{padding:36px 0 56px;color:var(--muted);font-size:15px;border-top:1px soli
 <tr><td data-label="Sequence">Control</td><td data-label="Pass">Tenant B first pass</td><td class="num" data-label="First call cached tokens"><strong>4,480 of 4,481</strong></td><td class="num" data-label="Pass cached share">99.9%</td></tr>
 </tbody></table>
 <p>The comparison that carries the claim: Tenant B's first call reads 0 cached tokens when salting is on and 4,480 of 4,481 when salting is off.</p>
-<p><strong>Timings, secondary.</strong> First calls took 5.39 s (A, cold, the first request after a restart), 1.576 s (B, salted, with the other tenant warm), 5.762 s (control A, cold) and 1.227 s (control B, unsalted, warm). Across the five repeat passes, the median of the per-pass median call latencies was 0.969 s for Tenant B and 1.028 s for Tenant A. Every call includes the round trip from the laptop through Caddy, the shim and LiteLLM, about one second end to end, so the prefill difference is hard to see in wall time at this prefix size. First passes are single measurements.</p>
+<p><strong>Timings, secondary.</strong> First calls took 5.39 s (A, cold, the first request after a restart), 1.576 s (B, salted, with the other tenant warm), 5.762 s (control A, cold) and 1.227 s (control B, unsalted, warm). Across the five repeat passes, the median of the per-pass median call latencies was 0.969 s for Tenant B and 1.028 s for Tenant A. Every call includes the round trip from the client interface through Caddy, the shim and LiteLLM, about one second end to end, so the prefill difference is hard to see in wall time at this prefix size. First passes are single measurements.</p>
 <p><strong>A setup failure, excluded from the results.</strong> Tenant A's key hit its $0.05 cap during the first set of repeat passes, because a 12-call pass costs about $0.0107 (cached tokens are priced at the same blended rate). Repeat 4 had refusals and repeat 5 was refused entirely. The budget was raised to $1.00 and all five of A's repeat passes were rerun, with the earlier files kept in <code>results/d2/superseded/</code>. The 15 resulting 422 responses appear in the D4 output as Tenant A's non-OK calls.</p>
 <details><summary>Full per-pass table from results/d2/summary.md</summary>
 <table class="rt">
