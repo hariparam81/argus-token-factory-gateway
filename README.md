@@ -35,7 +35,7 @@ I stood up a proof of concept to replicate the framework as closely as a small i
 
 ## How the POC was run
 
-One RTX 4090 on RunPod served Qwen2.5-Coder-7B-Instruct with vLLM 0.10.2 (prefix caching on, API key required). A small DigitalOcean droplet ran Caddy, an auth shim, LiteLLM (open-source tier) and Postgres under Docker Compose, with default-deny egress for the containers. Tenant A used a factory key. Tenant B used ZITADEL Cloud's free tier, and its agent ran on a laptop and reached the gateway through its public URL. The shim validated tokens, overwrote each tenant's `cache_salt`, capped request size and wrote an audit row per call. The workload was 33 QASPER questions over three papers. To rebuild it, start from `gateway/compose.yaml`, `gateway/env.example` and `gateway/registry.template.json`, then run the scripts in `clients/` in the order given in section 6 of the companion page. The run cost about $2.49.
+One RTX 4090 on RunPod served Qwen2.5-Coder-7B-Instruct with vLLM 0.10.2 (prefix caching on, API key required). A small DigitalOcean droplet ran Caddy, an auth shim, LiteLLM (open-source tier) and Postgres under Docker Compose, with default-deny egress for the containers. Tenant A used a factory key. Tenant B used ZITADEL Cloud's free tier, and its agent ran from a client interface and reached the gateway through its public URL. The shim validated tokens, overwrote each tenant's `cache_salt`, capped request size and wrote an audit row per call. The workload was 33 QASPER questions over three papers. To rebuild it, start from `gateway/compose.yaml`, `gateway/env.example` and `gateway/registry.template.json`, then run the scripts in `clients/` in the order given in section 6 of the companion page. The run cost about $2.49.
 
 ## Credits
 
