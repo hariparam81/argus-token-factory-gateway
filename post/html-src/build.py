@@ -13,14 +13,20 @@ LABELS = {
     "DIAGRAM1": ("diagram-1-system.svg", "d1", "Diagram 1: the system. Consumers and four identity paths on the left, the gateway in the centre, the model catalog on the right, and the audit bar underneath."),
     "DIAGRAM2": ("diagram-2-resolved-principal.svg", "d2", "Diagram 2: the resolved principal. Four paths converge into one principal record, with the downstream controls as chips."),
     "DIAGRAM3": ("diagram-3-delegated-call.svg", "d3", "Diagram 3: one delegated call across five lanes, with the audit row from the run."),
+    "DIAGRAM4": ("diagram-4-test-bed.svg", "d4", "Diagram 4: the proof of concept as built. Client interface, ZITADEL Cloud, the gateway droplet and the model pod."),
+    "DIAGRAM5": ("diagram-5-cache-contrast.svg", "d5", "Diagram 5: cached tokens on Tenant B's first call, with salting on and off."),
 }
+# diagrams 2 and 3 were drawn in the first palette; map them to the current theme
+RECOLOUR = {"#2F6FED": "#1E8E4E", "#E8F0FE": "#EAF4EC", "#D5D9E0": "#8FA39A", "#F4F5F7": "#F6F8F7", "#6B7280": "#5B6B63", "#5B6470": "#5B6B63"}
 
 
 def inline_svg(name, prefix, label):
     s = (ASSETS / name).read_text()
-    s = s.replace('id="a"', f'id="{prefix}a"').replace('id="g"', f'id="{prefix}g"')
-    s = s.replace("url(#a)", f"url(#{prefix}a)").replace("url(#g)", f"url(#{prefix}g)")
+    s = re.sub(r"#[0-9A-Fa-f]{6}", lambda m: RECOLOUR.get(m.group(0).upper(), m.group(0)), s)
+    for i in ("a", "g", "ak", "ag"):
+        s = s.replace(f'id="{i}"', f'id="{prefix}{i}"').replace(f"url(#{i})", f"url(#{prefix}{i})")
     s = re.sub(r'\swidth="\d+"\sheight="\d+"', "", s, count=1)
+    s = re.sub(r'\srole="img"\saria-label="[^"]*"', "", s, count=1)
     s = s.replace("<svg ", f'<svg role="img" aria-label="{label}" ', 1)
     return s
 
